@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulacro Diabetes #1 - Retro Hardcore</title>
+    
+    <!-- Fuentes para estilo Retro / 8-Bits -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            /* Paleta Modo Claro (Aún más apagado, tono arena/gris mate sin brillo) */
+            --bg-color: #c5bcb8; /* Fondo arena oscuro muy descansado para la vista */
+            --text-color: #2b2123; /* Texto oscurecido para no perder contraste */
+            --panel-bg: #dfd8d5; /* Paneles color pergamino oscuro */
+            --alt-bg: #d4ccca; /* Alternativas oscurecidas para encajar con el panel */
+            --border-color: #b8aba8; /* Bordes más marcados y suaves */
+            --primary: #8c4559; /* Rosa viejo un tono más oscuro y formal */
+            --primary-hover: #733748;
+            --correct: #29662c; 
+            --incorrect: #b03d58; 
+            --warning: #c27902; 
+            --shadow-sm: 2px 2px 0px rgba(43, 33, 35, 0.15); 
+            --shadow-md: 4px 4px 0px rgba(43, 33, 35, 0.2);
+            --btn-finalizar-bg: #29662c;
+            --accent-light: rgba(140, 69, 89, 0.08); 
+            --correct-bg: rgba(41, 102, 44, 0.08);
+            --incorrect-bg: rgba(176, 61, 88, 0.08);
+            --theme-toggle-bg: #8c4559;
+            --theme-toggle-knob: #dfd8d5;
+            --heading-color: #3d2d31;
+            --heading-border: #a37380;
+            --box-border: 2px solid #2b2123; 
+            --grid-color: rgba(0, 0, 0, 0.08); /* Cuadrícula adaptada al fondo más oscuro */
+        }
+
+        [data-theme="dark"] {
+            /* Paleta Modo Oscuro (Color Sólido Apagado) */
+            --bg-color: #232033; /* Púrpura azulado muy oscuro y sólido */
+            --text-color: #fcf8f8; 
+            --panel-bg: #2b2840; /* Paneles ligeramente más claros para contrastar */
+            --alt-bg: #312e47; 
+            --border-color: #4f4766; 
+            --primary: #8b5cf6; /* Violeta vibrante retro para que los botones resalten */
+            --primary-hover: #a78bfa; /* Violeta más iluminado al pasar el mouse */
+            --correct: #4ade80; 
+            --incorrect: #f472b6; 
+            --warning: #fde047; 
+            --shadow-sm: 2px 2px 0px rgba(0, 0, 0, 0.6);
+            --shadow-md: 4px 4px 0px rgba(0, 0, 0, 0.8);
+            --btn-finalizar-bg: #4ade80;  
+            --accent-light: rgba(139, 92, 246, 0.15); /* Ajustado al nuevo color primario */
+            --correct-bg: rgba(74, 222, 128, 0.12);
+            --incorrect-bg: rgba(244, 114, 182, 0.12); 
+            --theme-toggle-bg: #27243d;
+            --theme-toggle-knob: #8b5cf6;
+            --heading-color: #e5d8e8;
+            --heading-border: #6d5b82;
+            --box-border: 2px solid #7c3aed; /* Borde de cajas a juego con el color primario */
+            --grid-color: rgba(255, 255, 255, 0.06); /* Cuadrícula blanca tenue para modo oscuro */
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            font-size: 22px;
+            background-color: var(--bg-color); /* Usamos el color sólido en vez del degradado */
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            /* Cursor 8-bits normal (Flecha Rosa Pastel y Púrpura) */
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath fill='%235c3a41' d='M2,2 v20 l5,-5 l4,9 l4,-2 l-4,-9 l6,0 z'/%3E%3Cpath fill='%23ffb8cd' d='M4,5 v14 l3,-3 l4,9 l2,-1 l-4,-9 l4,0 z'/%3E%3Cpath fill='%23fff9f2' d='M6,7 v8 l2,-2 l1,0 z'/%3E%3C/svg%3E") 2 2, auto;
+        }
+
+        /* Cuadrícula Retro sobre el fondo */
+        body::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px; /* Tamaño ajustado para que luzca exactamente como la imagen */
+            z-index: -1; pointer-events: none;
+        }
+
+        /* Cursor 8-bits de interacción (Mano Rosa Pastel con Brillo) */
+        a, button, [role="button"], input, select, textarea, label, .nav-item, .alternativa, .btn-fullscreen, .volume-slider, .retro-slider {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath fill='%235c3a41' d='M10,2 h4 v6 h4 v-2 h4 v2 h4 v4 h4 v12 h-16 v-10 h-4 z'/%3E%3Cpath fill='%23ffb8cd' d='M12,4 h2 v18 h12 v-10 h-4 v-4 h-4 v-2 h-4 v-2 h-2 z'/%3E%3Crect fill='%23fff9f2' x='14' y='6' width='2' height='4'/%3E%3C/svg%3E") 12 2, pointer !important;
+        }
+
+        /* Solo el título principal y botones de la pantalla inicial conservan la fuente de bloque grueso */
+        h1, .btn-retro-start {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* Toda la zona de preguntas (H2, H3, Timer, Botones de navegación) unificada con la fuente legible */
+        h2, h3, .btn-retro, .timer-display, .retro-panel-ui {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 700;
+        }
+
+        /* ==========================================
+           PANTALLA DE INICIO - ARTE PIXELADO ÉPICO (ATARDECER)
+           ========================================== */
+        #startScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, #94a3cc 0%, #c4a7c7 40%, #f0b9bb 75%, #fae0c5 100%);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100;
+            transition: opacity 0.6s step-end; overflow: hidden;
+        }
+
+        /* Estrellas apareciendo en el atardecer */
+        .pixel-stars-early {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%; z-index: 0; pointer-events: none;
+        }
+        .px-star {
+            position: absolute; width: 4px; height: 4px; background: #fff9f2;
+            box-shadow: 0 0 8px 2px rgba(255, 249, 242, 0.6);
+            animation: twinkleStar 3s infinite alternate;
+        }
+        @keyframes twinkleStar {
+            0% { opacity: 0.1; transform: scale(0.8); }
+            100% { opacity: 0.9; transform: scale(1.2); }
+        }
+
+        /* Sol Pixelado Redondeado */
+        .pixel-sun-bg {
+            position: absolute; top: 25%; right: 20%; width: 28px; height: 28px; background: #fff9d6;
+            box-shadow: 
+                -8px 0 0 0 #fff9d6, 8px 0 0 0 #fff9d6,
+                0 -8px 0 0 #fff9d6, 0 8px 0 0 #fff9d6,
+                -4px -4px 0 4px #fff9d6, 4px 4px 0 4px #fff9d6,
+                -4px 4px 0 4px #fff9d6, 4px -4px 0 4px #fff9d6,
+                0 0 0 12px rgba(255, 249, 214, 0.3),
+                0 0 60px 20px rgba(255, 249, 214, 0.6);
+            z-index: 0;
+        }
+
+        /* Nubes Esponjosas Tintadas */
+        .pixel-cloud-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; overflow: hidden;
+        }
+        .px-cloud {
+            position: absolute; width: 30px; height: 30px; background: rgba(255, 250, 245, 0.85);
+            box-shadow: 
+                30px 0 0 rgba(255, 250, 245, 0.85), 60px 0 0 rgba(255, 250, 245, 0.85), 90px 0 0 rgba(255, 250, 245, 0.85), 120px 0 0 rgba(255, 250, 245, 0.85),
+                30px -30px 0 rgba(255, 250, 245, 0.85), 60px -30px 0 rgba(255, 250, 245, 0.85), 90px -30px 0 rgba(255, 250, 245, 0.85),
+                60px -60px 0 rgba(255, 250, 245, 0.85);
+            animation: floatClouds linear infinite;
+        }
+        .cloud1 { top: 12%; left: -200px; animation-duration: 45s; }
+        .cloud2 { top: 30%; left: -200px; animation-duration: 55s; animation-delay: -20s; transform: scale(0.6); opacity: 0.7;}
+        .cloud3 { top: 8%; left: -200px; animation-duration: 35s; animation-delay: -10s; transform: scale(1.1); }
+
+        @keyframes floatClouds {
+            0% { transform: translateX(0) scale(var(--scale, 1)); }
+            100% { transform: translateX(110vw) scale(var(--scale, 1)); }
+        }
+        
+        .retro-title-container {
+            position: relative; z-index: 10; text-align: center; margin-top: -8vh;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .retro-title-main {
+            font-size: clamp(2.5em, 5vw, 4.5em);
+            color: #fff9f2; margin: 0; line-height: 1.1;
+            text-shadow: 6px 6px 0 #7a638f, 0px 10px 0px rgba(0,0,0,0.15);
+        }
+
+        .retro-subtitle {
+            font-size: clamp(3.5em, 7vw, 6em);
+            color: #fff9f2; margin: 10px 0 0 0; line-height: 1.1;
+            text-shadow: 6px 6px 0 #7a638f, 0px 10px 0px rgba(0,0,0,0.15);
+            background: transparent; 
+            padding: 0; border: none; box-shadow: none; letter-spacing: 2px;
+        }
+
+        /* Sprite del Páncreas Adorable y su Flote */
+        .retro-pancreas {
+            width: 160px; height: 160px; margin-top: 30px;
+            position: relative; z-index: 10;
+            animation: floatPixel 2.5s ease-in-out infinite alternate; 
+            filter: drop-shadow(0px 15px 0px rgba(0,0,0,0.15));
+        }
+        @keyframes floatPixel {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-15px); }
+        }
+
+        /* --- CLASES DE BAILE INTERACTIVO (Sobrescriben el flote) --- */
+        .dance-jump { animation: danceJump 0.5s ease-out !important; }
+        .dance-wiggle { animation: danceWiggle 0.4s ease-in-out !important; }
+        .dance-squish { animation: danceSquish 0.4s ease-in-out !important; }
+        .dance-flip { animation: danceFlip 0.6s ease-in-out !important; }
+
+        @keyframes danceJump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-60px) scale(1.1); } }
+        @keyframes danceWiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-25deg); } 75% { transform: rotate(25deg); } }
+        @keyframes danceSquish { 0%, 100% { transform: scale(1,1); } 50% { transform: scale(1.3, 0.7) translateY(15px); } }
+        @keyframes danceFlip { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+
+        /* --- ANIMACIONES FACIALES DEL PÁNCREAS (CICLO DE 30 SEGUNDOS) --- */
+        .face-normal { animation: faceNormal 30s infinite; }
+        .face-blink { animation: faceBlink 30s infinite; opacity: 0; }
+        .face-happy { animation: faceHappy 30s infinite; opacity: 0; }
+        .face-surprised { animation: faceSurprised 30s infinite; opacity: 0; }
+        .face-angry { animation: faceAngry 30s infinite; opacity: 0; }
+        .face-dizzy { animation: faceDizzy 30s infinite; opacity: 0; }
+        .face-cool { animation: faceCool 30s infinite; opacity: 0; }
+        .face-star { animation: faceStar 30s infinite; opacity: 0; }
+        .face-sleep { animation: faceSleep 30s infinite; opacity: 0; }
+
+        @keyframes faceNormal {
+            0%, 7.9% {opacity:1} 8%, 20.9% {opacity:0} 21%, 27.9% {opacity:1} 28%, 50.9% {opacity:0} 51%, 57.9% {opacity:1} 58%, 67.9% {opacity:0} 68%, 70.9% {opacity:1} 71%, 100% {opacity:0}
+        }
+        @keyframes faceBlink {
+            0%, 7.9% {opacity:0} 8%, 10.9% {opacity:1} 11%, 37.9% {opacity:0} 38%, 40.9% {opacity:1} 41%, 67.9% {opacity:0} 68%, 70.9% {opacity:1} 71%, 100% {opacity:0}
+        }
+        @keyframes faceHappy { 0%, 10.9% {opacity:0} 11%, 20.9% {opacity:1} 21%, 100% {opacity:0} }
+        @keyframes faceSurprised { 0%, 27.9% {opacity:0} 28%, 37.9% {opacity:1} 38%, 100% {opacity:0} }
+        @keyframes faceAngry { 0%, 40.9% {opacity:0} 41%, 50.9% {opacity:1} 51%, 100% {opacity:0} }
+        @keyframes faceDizzy { 0%, 57.9% {opacity:0} 58%, 67.9% {opacity:1} 68%, 100% {opacity:0} }
+        @keyframes faceCool { 0%, 70.9% {opacity:0} 71%, 80.9% {opacity:1} 81%, 100% {opacity:0} }
+        @keyframes faceStar { 0%, 80.9% {opacity:0} 81%, 87.9% {opacity:1} 88%, 100% {opacity:0} }
+        @keyframes faceSleep { 0%, 87.9% {opacity:0} 88%, 100% {opacity:1} }
+
+        /* --- LIBERACIÓN DE HORMONAS Y ENZIMAS (ESTILO RPG) --- */
+        .hormone-container {
+            position: absolute; top: 80px; left: 50%;
+            width: 0; height: 0; z-index: 5; pointer-events: none;
+        }
+        .px-hormone {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            font-family: 'Press Start 2P', cursive; font-size: 0.55em;
+            padding: 4px 8px; border-radius: 4px; border: 2px solid #fff;
+            opacity: 0; text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+            white-space: nowrap;
+        }
+        
+        .insulina { background: #38bdf8; color: #fff; border-color: #0284c7; animation: releaseInsulin 30s infinite; }
+        .glucagon { background: #f59e0b; color: #fff; border-color: #b45309; animation: releaseGlucagon 30s infinite; }
+        .somatostatina { background: #a3e635; color: #fff; border-color: #4d7c0f; animation: releaseSomato 30s infinite; }
+        .amilina { background: #d946ef; color: #fff; border-color: #86198f; animation: releaseAmilina 30s infinite; }
+        .enzimas { background: #14b8a6; color: #fff; border-color: #0f766e; animation: releaseEnzimas 30s infinite; }
+        .peptido { background: #c084fc; color: #fff; border-color: #7e22ce; animation: releasePeptido 30s infinite; }
+        .zzz { background: #93c5fd; color: #1e3a8a; border-color: #3b82f6; animation: releaseZzz 30s infinite; }
+
+        @keyframes releaseInsulin {
+            0%, 10.9% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            11.5% { transform: translate(-140%, -40px) scale(1.1); opacity: 1; }
+            13% { transform: translate(-160%, -60px) scale(1); opacity: 0.9; }
+            16%, 100% { transform: translate(-200%, -100px) scale(0.8); opacity: 0; }
+        }
+        @keyframes releaseGlucagon {
+            0%, 27.9% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            28.5% { transform: translate(40%, -30px) scale(1.1); opacity: 1; }
+            30% { transform: translate(60%, -50px) scale(1); opacity: 0.9; }
+            33%, 100% { transform: translate(100%, -90px) scale(0.8); opacity: 0; }
+        }
+        @keyframes releaseSomato {
+            0%, 40.9% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            41.5% { transform: translate(-50%, -50px) scale(1.1); opacity: 1; }
+            43% { transform: translate(-50%, -80px) scale(1); opacity: 0.9; }
+            46%, 100% { transform: translate(-50%, -130px) scale(0.8); opacity: 0; }
+        }
+        @keyframes releaseAmilina {
+            0%, 57.9% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            58.5% { transform: translate(-100%, -20px) scale(1.1); opacity: 1; }
+            60% { transform: translate(-120%, -30px) scale(1); opacity: 0.9; }
+            63%, 100% { transform: translate(-150%, -60px) scale(0.8); opacity: 0; }
+        }
+        @keyframes releaseEnzimas {
+            0%, 70.9% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            71.5% { transform: translate(80%, -20px) scale(1.1); opacity: 1; }
+            73% { transform: translate(110%, -40px) scale(1); opacity: 0.9; }
+            76%, 100% { transform: translate(160%, -80px) scale(0.8); opacity: 0; }
+        }
+        @keyframes releasePeptido {
+            0%, 80.9% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            81.5% { transform: translate(-50%, -60px) scale(1.2); opacity: 1; }
+            83% { transform: translate(-50%, -90px) scale(1); opacity: 0.9; }
+            86%, 100% { transform: translate(-50%, -150px) scale(0.8); opacity: 0; }
+        }
+        @keyframes releaseZzz {
+            0%, 87.9% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            88.5% { transform: translate(30%, -30px) scale(1.1); opacity: 1; }
+            92% { transform: translate(50%, -60px) scale(1); opacity: 0.8; }
+            96%, 100% { transform: translate(80%, -90px) scale(0.8); opacity: 0; }
+        }
+
+        /* Botones de Inicio */
+        .btn-retro-start {
+            margin-top: 40px; font-family: 'Press Start 2P', cursive;
+            background: #d46c85; border: 4px solid #fff9f2; color: #fff9f2;
+            font-size: clamp(0.8em, 2vw, 1.2em); cursor: pointer;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+            z-index: 10; padding: 15px 30px;
+            transition: all 0.1s step-end;
+            animation: pulseGlow 2s steps(2, end) infinite;
+        }
+        .btn-retro-start:hover {
+            filter: brightness(1.25);
+            transform: scale(1.05);
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.3), 0 0 25px rgba(255, 249, 242, 0.7);
+            animation: none;
+        }
+        .btn-retro-start:active { transform: translate(4px, 4px) scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+        @keyframes pulseGlow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
+
+        .start-top-controls {
+            position: absolute; top: 30px; width: 100%; display: flex;
+            justify-content: space-between; padding: 0 40px; box-sizing: border-box; z-index: 110;
+        }
+        .start-btn-ui {
+            background: #d46c85; border: 4px solid #fff9f2; color: #fff9f2;
+            font-family: 'Press Start 2P', cursive; font-size: 0.7em;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2); padding: 10px 15px; cursor: pointer;
+            transition: all 0.1s step-end;
+        }
+        .start-btn-ui:hover {
+            filter: brightness(1.25);
+            transform: scale(1.05);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3), 0 0 15px rgba(255, 249, 242, 0.7);
+        }
+        .start-btn-ui:active { transform: translate(4px, 4px) scale(1); box-shadow: 0px 0px 0 rgba(0,0,0,0); }
+
+        /* ==========================================
+           INTERFAZ DE TRIVIA Y OVERLAYS
+           ========================================== */
+        .full-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 200; color: white; text-align: center;
+        }
+        .full-overlay span { font-size: 3em; font-family: 'Press Start 2P', cursive; text-shadow: 4px 4px 0 #e53e3e; }
+        .anim-skull { font-size: 6em; animation: shakeSkull 0.3s infinite; margin-bottom:20px; }
+        @keyframes shakeSkull { 0% { transform: translate(2px, 1px) } 50% { transform: translate(-2px, -1px) } 100% { transform: translate(2px, 1px) } }
+        
+        .anim-trophy { font-size: 6em; animation: bounceTrophy 1s steps(4) infinite; margin-bottom:20px; }
+        @keyframes bounceTrophy { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        /* Animación del Páncreas al dar START */
+        .anim-start-pancreas {
+            width: 180px; height: 180px; margin-bottom: 20px;
+            animation: zoomStart 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+            filter: drop-shadow(0 10px 0 rgba(0,0,0,0.5));
+            z-index: 10;
+        }
+        @keyframes zoomStart {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            50% { transform: scale(1.5) rotate(10deg); opacity: 1; }
+            100% { transform: scale(4) rotate(0deg); opacity: 0; }
+        }
+
+        .pause-box {
+            background: var(--panel-bg); color: var(--text-color); padding: 40px 30px;
+            border: 6px solid var(--text-color); /* Borde grueso estilo 8-bits */
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.6); /* Sombra dura retro */
+            text-align: center; min-width: 350px;
+            position: relative;
+            border-radius: 4px;
+        }
+        /* Borde interior punteado estilo RPG */
+        .pause-box::before {
+            content: ''; position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 2px dashed var(--border-color); pointer-events: none;
+        }
+        .pause-box h3 { 
+            font-family: 'Press Start 2P', cursive; /* Fuente pixelada para el título */
+            font-size: 1.2em; margin-bottom: 25px; 
+            color: var(--primary); 
+            text-shadow: 2px 2px 0px var(--border-color); 
+            position: relative; z-index: 1;
+        }
+        .pause-box p { 
+            font-size: 1.4em; font-family: 'VT323', monospace; 
+            margin-bottom: 35px; position: relative; z-index: 1; 
+        }
+        .pause-buttons { display: flex; justify-content: center; gap: 20px; position: relative; z-index: 1; }
+
+        #appContainer { display: none; width: 100%; height: 100%; }
+        
+        .sidebar {
+            box-sizing: border-box; width: 280px; min-width: 280px;
+            background: var(--panel-bg); border-right: var(--box-border);
+            padding: 20px; overflow-y: auto; display: flex; flex-direction: column;
+            box-shadow: var(--shadow-sm); z-index: 10;
+        }
+        .sidebar.hidden { margin-left: -280px; }
+        .sidebar h3 { font-size: 1em; margin-top: 0; color: var(--heading-color); border-bottom: 4px solid var(--heading-border); padding-bottom: 12px; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 4px dashed var(--border-color); flex-wrap: wrap; gap: 15px; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .header-left h2 { margin: 0; font-size: 1.2em; color: var(--heading-color); }
+        .header-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        
+        /* Controles UI Retro */
+        .retro-panel-ui {
+            background: var(--panel-bg); 
+            border: var(--box-border);
+            box-shadow: var(--shadow-sm); 
+            height: 44px; box-sizing: border-box;
+            display: flex; align-items: center; gap: 12px;
+            padding: 0 15px; color: var(--text-color);
+        }
+        
+        .btn-icon-music {
+            background: none; border: none; cursor: pointer; color: var(--text-color);
+            display: flex; align-items: center; justify-content: center; padding: 0;
+            transition: transform 0.1s;
+        }
+        .btn-icon-music:active { transform: scale(0.85); }
+        
+        .px-icon { fill: currentColor; shape-rendering: crispEdges; }
+        
+        /* Slider de volumen 8-bits */
+        input[type=range].retro-slider {
+            -webkit-appearance: none; width: 70px; background: transparent; cursor: pointer;
+        }
+        input[type=range].retro-slider:focus { outline: none; }
+        input[type=range].retro-slider::-webkit-slider-runnable-track {
+            width: 100%; height: 10px; background: var(--border-color); border: 2px solid var(--text-color);
+        }
+        input[type=range].retro-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 12px;
+            background: var(--text-color); margin-top: -5px;
+        }
+        input[type=range].retro-slider::-moz-range-track {
+            width: 100%; height: 10px; background: var(--border-color); border: 2px solid var(--text-color);
+        }
+        input[type=range].retro-slider::-moz-range-thumb {
+            height: 16px; width: 12px; background: var(--text-color); border: none; border-radius: 0;
+        }
+
+        /* Contenedor de Preguntas (Fuente Limpia y Legible) */
+        .question-container {
+            background: var(--panel-bg); padding: 20px 25px; /* Paddings reducidos */
+            border: var(--box-border); margin-bottom: 15px; 
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.9em; /* Fuente reducida */
+            font-weight: 500;
+            line-height: 1.5; box-shadow: var(--shadow-md); position: relative;
+        }
+        .question-container::after {
+            content: ''; position: absolute; bottom: -16px; right: 25px; /* Solapa más pequeña */
+            border-width: 16px 16px 0 0; border-style: solid;
+            border-color: var(--border-color) transparent transparent transparent;
+        }
+
+        .alternativa {
+            display: block; padding: 12px 15px; margin: 10px 0; /* Espacios internos reducidos */
+            border: 3px solid var(--border-color); /* Borde sutilmente más delgado */
+            cursor: pointer; background: var(--alt-bg); 
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.9em; /* Fuente reducida */
+            font-weight: 500; line-height: 1.4; 
+            transition: none; position: relative;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+        }
+        .alternativa:hover { border-color: var(--primary); background: var(--accent-light); }
+        .alternativa::before {
+            content: ''; display: inline-block; width: 0; height: 0;
+            border-top: 6px solid transparent; border-bottom: 6px solid transparent; /* Flecha más pequeña */
+            border-left: 10px solid transparent; margin-right: 12px;
+        }
+        .alternativa:hover::before { border-left-color: var(--primary); }
+        
+        .alternativa input { display: none; }
+        .selected { border-color: var(--primary) !important; background: var(--accent-light) !important; }
+        .selected::before { border-left-color: var(--primary) !important; }
+        .correct { border-color: var(--correct) !important; background: var(--correct-bg) !important; }
+        .incorrect { border-color: var(--incorrect) !important; background: var(--incorrect-bg) !important; }
+
+        .pauta-box {
+            background: var(--accent-light); border: var(--box-border); border-left: 6px solid var(--primary);
+            padding: 15px; margin-top: 20px; /* Paddings reducidos */
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.85em; /* Fuente reducida */
+            font-weight: 500; line-height: 1.5;
+        }
+
+        .controls { display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
+        
+        button.btn-retro {
+            background: var(--primary); color: #fff9f2; border: var(--box-border); padding: 12px 20px; /* Tamaño del botón ajustado */
+            cursor: pointer; font-size: 0.65em; box-shadow: var(--shadow-sm); text-transform: uppercase;
+            transition: all 0.1s step-end;
+        }
+        button.btn-retro:hover {
+            filter: brightness(1.15); transform: scale(1.02); box-shadow: var(--shadow-md);
+        }
+        button.btn-retro:active { transform: translate(4px, 4px) scale(1); box-shadow: 0 0 0 transparent; }
+        button.btn-cancel { background: var(--incorrect); }
+
+        .nav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; margin-bottom: auto; } /* Espaciado (gap) y margen reducido */
+        .nav-item {
+            padding: 6px 0; text-align: center; background: var(--panel-bg); border: 2px solid var(--border-color);
+            cursor: pointer; border-radius: 6px;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.85em; /* Fuente más pequeña */
+            font-weight: bold;
+            box-shadow: 2px 2px 0 var(--border-color); transition: all 0.1s;
+        }
+        .nav-item:hover { transform: translateY(-2px); box-shadow: 3px 3px 0 var(--border-color); }
+        .nav-item:active { transform: translate(2px, 2px); box-shadow: 0 0 0; }
+        .nav-item.answered { background-color: var(--accent-light); border-color: var(--primary); }
+        .nav-item.correct { background-color: var(--correct-bg); border-color: var(--correct); }
+        .nav-item.incorrect { background-color: var(--incorrect-bg); border-color: var(--incorrect); }
+        .nav-item.active { border-color: var(--primary); color: var(--primary); box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+
+        .resultado-box { text-align: center; padding: 40px 20px; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .resultado-score { font-size: 6em; font-weight: 800; margin: 20px 0; text-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
+        
+        .audio-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-family: 'VT323', monospace; }
+        .audio-btn, .speed-select, .voice-select {
+            background: var(--panel-bg); color: var(--text-color); border: var(--box-border);
+            padding: 4px 10px; font-size: 1.1em; cursor: pointer; font-family: 'VT323', monospace;
+        }
+
+        /* --- BOTÓN PANTALLA COMPLETA RETRO 8-BITS --- */
+        .btn-fullscreen {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border: var(--box-border);
+            color: #fff9f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            z-index: 9999;
+            transition: all 0.1s step-end;
+            padding: 0;
+        }
+        .btn-fullscreen:hover {
+            filter: brightness(1.15);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-fullscreen:active {
+            transform: translate(4px, 4px) scale(1);
+            box-shadow: 0 0 0 transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MÚSICA DE INICIO Y TRIVIA -->
+    <audio id="bgMusicStart" loop preload="auto">
+        <source src="https://incompetech.com/music/royalty-free/mp3-royaltyfree/Overcast.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgMusicTrivia" loop preload="auto">
+        <source src="https://incompetech.com/music/royalty-free/mp3-royaltyfree/Artifact.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgMusicResults" loop preload="auto">
+        <source src="https://incompetech.com/music/royalty-free/mp3-royaltyfree/Super%20Friendly.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- PANTALLA DE INICIO (ARTE PIXELADO ÉPICO) -->
+    <div id="startScreen">
+        
+        <!-- Estrellas Tempranas y Sol Pixelado -->
+        <div class="pixel-stars-early">
+            <div class="px-star" style="top:15%; left:10%; animation-delay: 0s;"></div>
+            <div class="px-star" style="top:25%; left:30%; animation-delay: 1s;"></div>
+            <div class="px-star" style="top:10%; left:60%; animation-delay: 2s;"></div>
+            <div class="px-star" style="top:5%; left:80%; animation-delay: 0.5s;"></div>
+            <div class="px-star" style="top:28%; left:90%; animation-delay: 1.5s;"></div>
+        </div>
+        <div class="pixel-sun-bg"></div>
+
+        <!-- Paisaje Épico Multicapa -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" preserveAspectRatio="xMidYMax slice" style="position:absolute; bottom:0; left:0; width:100%; height:45vh; z-index:1; shape-rendering: crispEdges;">
+            <path fill="#cfb2cd" d="M0,120 v-40 h10 v-5 h5 v-10 h10 v-15 h10 v5 h5 v15 h10 v10 h20 v-20 h10 v-10 h15 v10 h15 v25 h20 v-15 h10 v-10 h15 v10 h15 v20 h20 v-5 h15 v15 h15 v25 h20 v-15 h15 v30 h25 v30 z" />
+            <path fill="#a992b8" d="M0,120 v-30 h25 v-10 h15 v-15 h20 v10 h15 v-5 h10 v15 h20 v-30 h10 v-10 h5 v5 h10 v-5 h5 v10 h10 v30 h20 v-15 h15 v-5 h15 v15 h20 v-10 h15 v5 h25 v15 h30 v30 z" />
+            <rect x="110" y="60" width="4" height="4" fill="#fae0c5" />
+            <rect x="125" y="55" width="4" height="8" fill="#fae0c5" />
+            <rect x="140" y="60" width="4" height="4" fill="#fae0c5" />
+            <path fill="#857a9e" d="M0,120 v-30 h5 v-10 h5 v-10 h5 v-10 h10 v10 h5 v10 h5 v10 h15 v-15 h5 v-10 h5 v-10 h10 v10 h5 v10 h5 v15 h25 v-10 h10 v10 h20 v-20 h5 v-10 h5 v-10 h10 v10 h5 v10 h5 v20 h30 v-15 h5 v-10 h5 v-10 h10 v10 h5 v10 h5 v15 h25 v-10 h10 v10 h25 v30 z" />
+            <path fill="#5c3a41" d="M10,120 v-40 h-5 v-10 h10 v-10 h5 v-10 h10 v10 h5 v10 h10 v10 h-5 v40 z"/>
+            <path fill="#5c3a41" d="M280,120 v-50 h-10 v-10 h10 v-15 h10 v-10 h10 v10 h10 v15 h10 v10 h-10 v50 z"/>
+            <path fill="#5c3a41" d="M0,120 v-15 h40 v-5 h30 v5 h50 v-5 h60 v5 h40 v-5 h50 v5 h50 v15 z" />
+            <rect x="25" y="95" width="6" height="5" fill="#5c3a41" />
+            <rect x="80" y="95" width="10" height="5" fill="#5c3a41" />
+            <rect x="145" y="90" width="8" height="5" fill="#5c3a41" />
+            <rect x="220" y="95" width="12" height="5" fill="#5c3a41" />
+        </svg>
+
+        <!-- Nubes pixeladas -->
+        <div class="pixel-cloud-container">
+            <div class="px-cloud cloud1" style="--scale: 1;"></div>
+            <div class="px-cloud cloud2" style="--scale: 0.7;"></div>
+            <div class="px-cloud cloud3" style="--scale: 1.2;"></div>
+        </div>
+        
+        <!-- Controles Top -->
+        <div class="start-top-controls">
+            <div class="start-btn-ui" style="display:flex; align-items:center; gap:15px; padding: 6px 15px; cursor:default;">
+                <button id="btnToggleMusic" style="background:none; border:none; color:inherit; font-family:inherit; font-size:inherit; cursor:pointer; padding:0;" onclick="toggleStartMusic(event)" onmouseenter="playOptionHoverSound()">
+                    MÚSICA ON
+                </button>
+                <input type="range" id="startVolume" class="retro-slider" min="0" max="1" step="0.05" value="0.25" oninput="changeTriviaVolume(this.value)" onmouseenter="playOptionHoverSound()">
+            </div>
+            <button class="start-btn-ui" onclick="triggerPancreasDance(event)" onmouseenter="playOptionHoverSound()">
+                BAILAR
+            </button>
+        </div>
+
+        <!-- Menú Principal Retro -->
+        <div class="retro-title-container">
+            <h1 class="retro-title-main">SIMULACRO</h1>
+            <div class="retro-subtitle">DIABETES #1</div>
+            
+            <div style="position: relative;">
+                <!-- Páncreas diseñado en Pixel-Art -->
+                <svg class="retro-pancreas" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
+                    <style>.px { shape-rendering: crispEdges; }</style>
+                    <path class="px" fill="#000" d="M 3,7 h2 v-2 h4 v-1 h6 v1 h4 v1 h2 v4 h-1 v3 h-3 v1 h-7 v1 h-4 v-1 h-2 v-2 h-1 v-5 z"/>
+                    <path class="px" fill="#d95079" d="M 4,7 h1 v-1 h4 v-1 h6 v1 h4 v1 h1 v4 h-1 v2 h-3 v1 h-6 v1 h-4 v-1 h-2 v-2 h-1 v-4 z"/>
+                    <path class="px" fill="#ff7ba3" d="M 4,7 h1 v-1 h4 v-1 h6 v1 h4 v1 h1 v3 h-17 v-3 z"/>
+                    <path class="px" fill="#ffb8cd" d="M 6,6 h2 v1 h-2 z M 11,6 h3 v1 h-3 z M 16,7 h2 v1 h-2 z"/>
+                    <rect class="px" fill="#b8385e" x="6" y="9" width="1" height="1"/><rect class="px" fill="#b8385e" x="8" y="11" width="1" height="1"/><rect class="px" fill="#b8385e" x="5" y="12" width="1" height="1"/>
+                    <rect class="px" fill="#e53e3e" x="10" y="10" width="1" height="1"/><rect class="px" fill="#e53e3e" x="19" y="10" width="1" height="1"/>
+
+                    <g class="face-normal">
+                        <rect class="px" fill="#000" x="12" y="8" width="2" height="3"/><rect class="px" fill="#000" x="17" y="8" width="2" height="3"/>
+                        <rect class="px" fill="#fff" x="12" y="8" width="1" height="1"/><rect class="px" fill="#fff" x="17" y="8" width="1" height="1"/>
+                        <path class="px" fill="#000" d="M 14,11 h3 v1 h-3 z"/>
+                    </g>
+                    <g class="face-blink">
+                        <rect class="px" fill="#000" x="11" y="9" width="3" height="1"/><rect class="px" fill="#000" x="17" y="8" width="2" height="3"/>
+                        <rect class="px" fill="#fff" x="17" y="8" width="1" height="1"/><path class="px" fill="#000" d="M 14,11 h3 v1 h-3 z"/>
+                    </g>
+                    <g class="face-happy">
+                        <rect class="px" fill="#000" x="12" y="8" width="2" height="1"/><rect class="px" fill="#000" x="11" y="9" width="1" height="1"/>
+                        <rect class="px" fill="#000" x="14" y="9" width="1" height="1"/><rect class="px" fill="#000" x="17" y="8" width="2" height="1"/>
+                        <rect class="px" fill="#000" x="16" y="9" width="1" height="1"/><rect class="px" fill="#000" x="19" y="9" width="1" height="1"/>
+                        <rect class="px" fill="#000" x="14" y="11" width="3" height="2"/><rect class="px" fill="#d95079" x="15" y="12" width="1" height="1"/>
+                    </g>
+                    <g class="face-surprised">
+                        <rect class="px" fill="#000" x="11" y="7" width="3" height="4"/><rect class="px" fill="#000" x="17" y="7" width="3" height="4"/>
+                        <rect class="px" fill="#fff" x="12" y="8" width="1" height="1"/><rect class="px" fill="#fff" x="18" y="8" width="1" height="1"/>
+                        <rect class="px" fill="#000" x="14" y="11" width="2" height="2"/>
+                    </g>
+                    <g class="face-angry">
+                        <rect class="px" fill="#000" x="11" y="7" width="2" height="1"/><rect class="px" fill="#000" x="13" y="8" width="1" height="1"/>
+                        <rect class="px" fill="#000" x="18" y="7" width="2" height="1"/><rect class="px" fill="#000" x="17" y="8" width="1" height="1"/>
+                        <rect class="px" fill="#000" x="12" y="9" width="2" height="2"/><rect class="px" fill="#000" x="17" y="9" width="2" height="2"/>
+                        <path class="px" fill="#000" d="M 14,12 h3 v1 h-3 z"/>
+                    </g>
+                    <g class="face-dizzy">
+                        <path class="px" fill="#000" d="M 11,8 h1 v1 h-1 z M 13,8 h1 v1 h-1 z M 12,9 h1 v1 h-1 z M 11,10 h1 v1 h-1 z M 13,10 h1 v1 h-1 z"/>
+                        <path class="px" fill="#000" d="M 16,8 h1 v1 h-1 z M 18,8 h1 v1 h-1 z M 17,9 h1 v1 h-1 z M 16,10 h1 v1 h-1 z M 18,10 h1 v1 h-1 z"/>
+                        <rect class="px" fill="#000" x="13" y="12" width="4" height="1"/>
+                        <rect class="px" fill="#38bdf8" x="9" y="6" width="1" height="2"/><rect class="px" fill="#38bdf8" x="8" y="8" width="3" height="1"/>
+                    </g>
+                    <g class="face-cool">
+                        <rect class="px" fill="#000" x="10" y="7" width="10" height="3"/><rect class="px" fill="#1a1a1a" x="11" y="8" width="8" height="1"/>
+                        <rect class="px" fill="#fff" x="12" y="8" width="1" height="1"/><path class="px" fill="#000" d="M 15,11 h3 v1 h-3 z"/>
+                        <rect class="px" fill="#000" x="14" y="10" width="1" height="1"/>
+                    </g>
+                    <g class="face-star">
+                        <rect class="px" fill="#fde047" x="12" y="7" width="1" height="3"/><rect class="px" fill="#fde047" x="11" y="8" width="3" height="1"/>
+                        <rect class="px" fill="#fde047" x="17" y="7" width="1" height="3"/><rect class="px" fill="#fde047" x="16" y="8" width="3" height="1"/>
+                        <rect class="px" fill="#000" x="14" y="11" width="3" height="3"/><rect class="px" fill="#d95079" x="15" y="12" width="1" height="1"/>
+                    </g>
+                    <g class="face-sleep">
+                        <rect class="px" fill="#000" x="11" y="9" width="3" height="1"/><rect class="px" fill="#000" x="16" y="9" width="3" height="1"/>
+                        <rect class="px" fill="#000" x="15" y="11" width="1" height="1"/>
+                    </g>
+                </svg>
+
+                <div class="hormone-container">
+                    <div class="px-hormone insulina">INSULINA</div>
+                    <div class="px-hormone glucagon">GLUCAGÓN</div>
+                    <div class="px-hormone somatostatina">SOMATOSTATINA</div>
+                    <div class="px-hormone amilina">AMILINA</div>
+                    <div class="px-hormone enzimas">ENZIMAS</div>
+                    <div class="px-hormone peptido">PÉPTIDO PP</div>
+                    <div class="px-hormone zzz">Zzz...</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-retro-start" onclick="iniciarHardcore()" onmouseenter="playOptionHoverSound()">
+            PRESS START
+        </button>
+    </div>
+
+    <!-- Overlays -->
+    <div id="modoOverlay" class="full-overlay" style="display: none;"></div>
+
+    <div id="pauseMenuOverlay" class="full-overlay" style="display: none;">
+        <div class="pause-box">
+            <h3>PAUSA</h3>
+            <p id="pauseText">¿Qué deseas hacer?</p>
+            <div class="pause-buttons">
+                <button class="btn-retro" onclick="closePauseMenu()">REANUDAR</button>
+                <button class="btn-retro btn-cancel" onclick="returnToMainMenu()">SALIR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmSubmitOverlay" class="full-overlay" style="display: none;">
+        <div class="pause-box">
+            <h3>¡ATENCIÓN!</h3>
+            <p>¿Calcular el puntaje final?</p>
+            <div class="pause-buttons">
+                <button class="btn-retro btn-cancel" onclick="closeConfirmSubmit()">VOLVER</button>
+                <button class="btn-retro" onclick="confirmSubmit()">FINALIZAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL TRIVIA HARDCORE -->
+    <div id="appContainer">
+        <div class="sidebar" id="sidebar">
+            <h3>MAPA</h3>
+            <div id="navGrid" class="nav-grid"></div>
+            <button id="btnFinalizar" class="btn-retro" style="width:100%; margin-top:20px; display: none;" onclick="procesarFinalizacion()" onmouseenter="playOptionHoverSound()">RESULTADOS</button>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <div class="header-left">
+                    <button onclick="toggleSidebar()" class="btn-icon-music" style="background: var(--panel-bg); border: var(--box-border); box-shadow: var(--shadow-sm); border-radius: 6px; width: 44px; height: 44px; flex-shrink: 0;" onmouseenter="playOptionHoverSound()" title="Abrir / Cerrar Mapa">
+                        <svg class="px-icon" viewBox="0 0 16 16" width="26" height="26">
+                            <path d="M2,3 h2 v2 h-2 z M5,3 h9 v2 h-9 z M2,7 h2 v2 h-2 z M5,7 h9 v2 h-9 z M2,11 h2 v2 h-2 z M5,11 h9 v2 h-9 z"/>
+                        </svg>
+                    </button>
+                    <h2 id="qTitle">Pregunta 1</h2>
+                </div>
+                <div class="header-controls">
+                    <!-- Panel Audio -->
+                    <div class="retro-panel-ui">
+                        <button id="btnToggleTriviaMusic" class="btn-icon-music" onclick="toggleTriviaMusic()" title="Música" onmouseenter="playOptionHoverSound()">
+                            <svg class="px-icon" viewBox="0 0 16 16" width="22" height="22"><path d="M8,2 h2 v12 h-2 z M6,3 h2 v10 h-2 z M4,4 h2 v8 h-2 z M2,6 h2 v4 h-2 z M11,6 h1 v4 h-1 z M13,4 h1 v8 h-1 z"/></svg>
+                        </button>
+                        <input type="range" id="triviaVolume" class="retro-slider" min="0" max="1" step="0.05" value="0.25" oninput="changeTriviaVolume(this.value)" onmouseenter="playOptionHoverSound()">
+                        <button id="btnToggleSFX" class="btn-icon-music" onclick="toggleSFX()" title="Efectos de sonido" onmouseenter="playOptionHoverSound()">
+                            <svg class="px-icon" viewBox="0 0 16 16" width="22" height="22"><path d="M7,1 h2 v1 h-2 z M6,2 h4 v1 h-4 z M5,3 h6 v6 h-6 z M4,9 h8 v2 h-8 z M2,11 h12 v2 h-12 z M6,13 h4 v1 h-4 z M7,14 h2 v1 h-2 z"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Panel Timer Minimalista -->
+                    <div id="timerDisplay" class="retro-panel-ui" style="display: none; justify-content: center; min-width: 140px; font-family: system-ui, sans-serif; font-weight: bold; font-size: 1.1em; border-radius: 6px;">
+                        <svg class="px-icon" viewBox="0 0 16 16" width="20" height="20" style="margin-right:8px;"><path d="M6,0 h4 v2 h-4 z M12,1 h2 v1 h-2 z M4,2 h8 v1 h-8 z M2,3 h2 v1 h-2 z M12,3 h2 v1 h-2 z M1,4 h1 v2 h-1 z M14,4 h1 v2 h-1 z M0,6 h1 v5 h-1 z M15,6 h1 v5 h-1 z M1,11 h1 v2 h-1 z M14,11 h1 v2 h-1 z M2,13 h2 v1 h-2 z M12,13 h2 v1 h-2 z M4,14 h8 v1 h-8 z M7,4 h2 v3 h3 v2 h-5 z"/></svg>
+                        <span id="timerText">00:00:00</span>
+                    </div>
+
+                    <!-- Panel Tema (Icono Sol y Luna Dinámico) -->
+                    <button class="btn-icon-music" onclick="toggleTheme(event)" title="Cambiar Tema (Claro/Oscuro)" onmouseenter="playOptionHoverSound()" style="background: var(--panel-bg); border: var(--box-border); box-shadow: var(--shadow-sm); border-radius: 6px; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0;">
+                        <!-- Luna (Aparece en modo claro, concavidad a la izquierda) -->
+                        <svg id="icon-moon" class="px-icon" viewBox="0 0 16 16" width="22" height="22" style="fill: #1e3a8a;">
+                            <path d="M7,2 h2 v1 h2 v1 h1 v1 h1 v4 h-1 v1 h-1 v1 h-2 v1 h-2 v-1 h1 v-1 h1 v-1 h1 v-4 h-1 v-1 h-1 v-1 h-1 v-1 z"/>
+                        </svg>
+                        <!-- Sol (Aparece en modo oscuro, ahora de color blanco) -->
+                        <svg id="icon-sun" class="px-icon" viewBox="0 0 16 16" width="22" height="22" style="display: none; fill: #ffffff;">
+                            <path d="M6,5 h4 v1 h1 v4 h-1 v1 h-4 v-1 h-1 v-4 h1 z M7,1 h2 v2 h-2 z M7,13 h2 v2 h-2 z M1,7 h2 v2 h-2 z M13,7 h2 v2 h-2 z M3,3 h2 v2 h-2 z M11,11 h2 v2 h-2 z M11,3 h2 v2 h-2 z M3,11 h2 v2 h-2 z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="question-container" id="qContainer"></div>
+
+            <div class="controls" id="controlsContainer">
+                <button id="btnAnterior" class="btn-retro" onclick="navQuestion(-1)" onmouseenter="playOptionHoverSound()">ATRÁS</button>
+                <button id="btnSiguiente" class="btn-retro" onclick="navQuestion(1)" onmouseenter="playOptionHoverSound()">AVANZAR</button>
+                <button id="btnPuntajeFinal" class="btn-retro" onclick="procesarFinalizacion()" onmouseenter="playOptionHoverSound()" style="display: none; background-color: var(--correct);">TERMINAR</button>
+                <button id="btnVolverInicio" class="btn-retro btn-cancel" onclick="returnToMainMenu()" onmouseenter="playOptionHoverSound()" style="display: none;">INICIO</button>
+            </div>
+            
+            <p style="text-align:center; opacity:0.6; font-size:1em; margin-top:30px;">
+                * Presiona <kbd>ESC</kbd> para pausar (El tiempo no se detiene).
+            </p>
+        </div>
+    </div>
+
+    <!-- BOTÓN PANTALLA COMPLETA (ESTILO 8-BITS) -->
+    <button id="btnFullscreen" class="btn-fullscreen" onclick="toggleFullscreen(); playClickSound();" onmouseenter="playOptionHoverSound()" title="Pantalla Completa">
+        <!-- Icono Expandir (Pixel Art) -->
+        <svg id="iconEnterFS" class="px-icon" viewBox="0 0 16 16" width="22" height="22">
+            <path d="M1,1 h5 v2 h-3 v3 h-2 z M10,1 h5 v5 h-2 v-3 h-3 z M1,10 h2 v3 h3 v2 h-5 z M10,15 h5 v-5 h-2 v3 h-3 z"/>
+        </svg>
+        <!-- Icono Contraer (Pixel Art) -->
+        <svg id="iconExitFS" class="px-icon" viewBox="0 0 16 16" width="22" height="22" style="display: none;">
+            <path d="M6,6 h-5 v-2 h3 v-3 h2 z M10,6 h5 v-2 h-3 v-3 h-2 z M6,10 h-5 v2 h3 v3 h2 z M10,10 h5 v2 h-3 v3 h-2 z"/>
+        </svg>
+    </button>
+
+    <script>
+        // ==========================================
+        //  CONFIGURACIÓN DE DATOS
+        // ==========================================
+const clavijero = {
+    "q1": "C",
+    "q2": "B",
+    "q3": "B",
+    "q4": "A",
+    "q5": "B",
+    "q6": "C",
+    "q7": "C",
+    "q8": "A",
+    "q9": "B",
+    "q10": "C",
+    "q11": "C",
+    "q12": "B",
+    "q13": "A",
+    "q14": "D",
+    "q15": "E",
+    "q16": "E",
+    "q17": "E",
+    "q18": "C",
+    "q19": "B",
+    "q20": "D",
+    "q21": "C",
+    "q22": "B",
+    "q23": "E",
+    "q24": "B",
+    "q25": "D",
+    "q26": "C",
+    "q27": "E",
+    "q28": "B",
+    "q29": "C",
+    "q30": "A",
+    "q31": "D",
+    "q32": "B",
+    "q33": "A",
+    "q34": "A",
+    "q35": "D"
+};
+
+const pautas = {
+    "q1": "Los <strong>efectos gastrointestinales</strong> (diarrea, meteorismo, dolor abdominal y náuseas) son la reacción adversa más frecuente de la metformina, reportada en un 30% a 40% de los pacientes. Ocurren por una absorción lenta e incompleta en el intestino y son dosis-dependientes. La acidosis láctica es una complicación extremadamente rara (<10 casos por 100.000 pacientes/año) y el déficit de vitamina B12 ocurre con el uso crónico/prolongado.",
+    "q2": "La vildagliptina (iDPP-4) se somete a hidrólisis hepática e inactivación metabólica, habiéndose descrito elevación de transaminasas. Por norma del MINSAL y de seguridad farmacológica, se encuentra <strong>contraindicada en pacientes con insuficiencia hepática</strong> o transaminasas elevadas (>3 veces el límite superior). En insuficiencia renal moderada/severa no está contraindicada, sino que requiere ajuste de dosis a 50 mg/día.",
+    "q3": "Según la Guía Clínica de Diabetes y Embarazo del MINSAL, la PTGO realizada entre las 24 y 28 semanas de gestación establece el diagnóstico de <strong>Diabetes Gestacional</strong> si la glicemia en ayunas es ≥ 100 mg/dL Y/O la glicemia a las 2 horas post-carga de 75g es <strong>≥ 140 mg/dL</strong>. En esta paciente, el valor post-carga de 148 mg/dL confirma el diagnóstico.",
+    "q4": "En Diabetes Gestacional, las metas terapéuticas del automonitoreo son glicemia en ayunas < 90-95 mg/dL y 2 horas postprandial < 120 mg/dL. Si tras 1 a 2 semanas de dieta y ejercicio no se alcanzan las metas, la norma chilena (MINSAL) y guías internacionales indican iniciar inmediatamente <strong>insulinoterapia</strong>. La metformina no es de primera línea en el embarazo y los iSGLT2 o sulfonilureas están contraindicados.",
+    "q5": "La prediabetes representa una etapa intermedia en que la <strong>resistencia periférica a la insulina es tan alta que la hipersecreción pancreática compensatoria resulta insuficiente</strong> para mantener la normoglicemia. La masa beta pancreática no da abasto, elevando los niveles de glucosa por sobre lo normal (ayuno 100-125 mg/dL o PTGO 140-199 mg/dL), sin cumplir aún los criterios de diabetes Mellitus.",
+    "q6": "Para confirmar el diagnóstico de Diabetes Mellitus tipo 2 en un paciente asintomático, las guías MINSAL exigen contar con <strong>dos exámenes en rango de diabetes</strong>. Como el paciente presentó una glicemia de ayuno en rango de prediabetes (118 mg/dL) y solo un examen en rango de diabetes (HbA1c = 6.8%, umbral ≥ 6.5%), se debe <strong>repetir la glicemia de ayuno y la HbA1c</strong> para confirmar o descartar el diagnóstico antes de activar el GES.",
+    "q7": "La <strong>hipertrofia del tejido adiposo visceral</strong> (depósito graso de drenaje portal) promueve un estado proinflamatorio con secreción de TNF-α e IL-6, aumento de ácidos grasos libres y reducción de adiponectina. Esto altera la señalización post-receptor de la insulina (fosforilación en serina/treonina del IRS-1/IRS-2), desencadenando resistencia insulínica sistémica.",
+    "q8": "La evaluación inicial del Síndrome Metabólico (criterios ATP III / IDF) exige medir específicamente sus componentes lipídicos y glicémicos: <strong>perfil lipídico</strong> (triglicéridos y HDL) y pruebas de metabolismo hidrocarbonado: <strong>glicemia en ayunas, TTGO/PTGO y HbA1c</strong>. Cabe destacar que la medición de insulinemia o curva de insulina NO está recomendada para el diagnóstico de resistencia insulínica ni síndrome metabólico.",
+    "q9": "En pacientes con diabetes mellitus tipo 2, la hiperglicemia crónica y la glucotoxicidad inducen una paradoja fisiopatológica: un <strong>aumento en la expresión y actividad transcripcional de SGLT1 y SGLT2</strong> en el epitelio tubular renal e intestinal. Esto incrementa la reabsorción de glucosa filtrada, perpetuando y exacerbando el estado de hiperglicemia.",
+    "q10": "La fase precoz de la disfunción metabólica y falla de la célula beta se caracteriza por la <strong>pérdida o disminución de la primera fase de secreción rápida de insulina</strong> (liberación de vesículas preformadas), produciendo hiperglicemia postprandial inicial. Como mecanismo compensatorio, el páncreas extiende y aumenta la <strong>segunda fase de secreción</strong> (insulina de nueva síntesis), generando hiperinsulinemia tardía.",
+    "q11": "La resistencia a la insulina cursa con un estado de <strong>hiperinsulinemia prolongada</strong>. Dado que la insulina es la principal hormona anabólica y la más potente inhibidora de la lipólisis, sus niveles plasmáticos elevados en forma continua bloquean la degradación de los triglicéridos en el tejido adiposo, dificultando la reducción del peso corporal.",
+    "q12": "En las fases precoces e intermedias de la resistencia a la insulina, las células beta pancreáticas hipersecretan insulina como mecanismo compensatorio. En consecuencia, en el estado postprandial <strong>la insulina aumenta significativamente sobre los niveles normales</strong>, logrando que <strong>la glicemia se mantenga dentro de rangos normales</strong>.",
+    "q13": "En la enfermedad de Alzheimer existe un defecto metabólico cerebral de utilización de glucosa caracterizado por una <strong>disminución marcada en la expresión de los transportadores GLUT1</strong> (presente en la barrera hematoencefálica y astrocitos) y <strong>GLUT3</strong> (transportador neuronal de alta afinidad), afectando el aporte energético en el SNC.",
+    "q14": "El efecto máximo (pico) de la insulina NPH ocurre entre las 5 y 7 horas post-inyección. Administrarla a las 20:00 hrs ubica el pico en la madrugada (2:00-4:00 AM), momento de menor resistencia insulínica, desencadenando hipoglicemia nocturna. <strong>Retardar la inyección a las 23:00 hrs</strong> desplaza el pico hacia las 6:00-7:00 AM, haciéndolo coincidir con el aumento fisiológico matutino de cortisol (efecto del alba).",
+    "q15": "Al intensificar el tratamiento con esquemas de insulina basal-bolo o dosis múltiples, se deben <strong>suspender de inmediato las sulfonilureas</strong> (glibenclamida). Mantener un secretagogo junto con insulina exógena incrementa de forma severa e inaceptable el riesgo de hipoglicemia grave por sobreestimulación pancreática.",
+    "q16": "La <strong>dislipidemia aterogénica</strong> es el patrón lipídico característico y más frecuente en pacientes con diabetes tipo 2 y síndrome metabólico. Se define por la tríada: elevación de triglicéridos, disminución de colesterol HDL y presencia de partículas de colesterol LDL pequeñas y densas.",
+    "q17": "La indicación médica absoluta para iniciar tratamiento farmacológico con fibratos (fenofibrato, ciprofibrato o gemfibrozilo) es cuando los triglicéridos plasmáticos se encuentran <strong>> 500 mg/dL</strong>, con el objetivo de prevenir el desarrollo de una pancreatitis aguda hipertrigliceridémica.",
+    "q18": "Diversos fármacos favorecen la ganancia ponderal: antipsicóticos (olanzapina, quetiapina), anticonvulsivantes (ácido valproico, pregabalina), antidepresivos (amitriptilina, paroxetina) y anticonceptivos (progestinas inyectables). Los <strong>antihistamínicos</strong> no forman parte de los grupos farmacológicos asociados de forma estandarizada a ganancia de peso clínica relevante.",
+    "q19": "El <strong>hipotiroidismo primario severo</strong> es una causa secundaria endocrinológica bien establecida de aumento de peso y disminución de la tasa metabólica basal. El Síndrome de Down y la mutación de MC4R corresponden a causas primarias (sindromáticas y monogénicas), mientras que el lipedema es un trastorno del tejido graso de extremidades.",
+    "q20": "Ante la sospecha de hipoglicemia en un sujeto no diabético, antes de someterlo a un complejo y riesgoso test de ayuno de 72 horas para buscar tumores neuroendocrinos (insulinoma), la primera causa que el clínico debe descartar es la <strong>hipoglicemia accidental, iatrogénica o facticia</strong> (ingesta/administración oculta de sulfonilureas o insulina exógena).",
+    "q21": "En el debut de Diabetes Mellitus tipo 1 en un adulto joven (70 kg), la Dosis Diaria Total (DDT) de sustitución fisiológica se calcula a ~0.6 U/kg/día (42 U/día). Como la insulina basal debe aportar el 50% de la dosis total diaria, corresponden <strong>21 U al día</strong> de insulina basal (0.3 U/kg/día x 70 kg).",
+    "q22": "En el debut de diabetes, la presencia de un <strong>IMC menor a 25 kg/m²</strong> (ausencia de sobrepeso u obesidad), edad < 35 años, debut brusco con cetoacidosis e inestabilidad glicémica sugieren fuertemente el diagnóstico de Diabetes Mellitus tipo 1 por sobre la tipo 2.",
+    "q23": "En pacientes sin diabetes, la hipoglicemia real se define mediante la comprobación de la Tríada de Whipple acompañada de un nivel de glicemia venosa disminuida <strong>< 55 mg/dL</strong> (a diferencia del paciente diabético en tratamiento, donde se utiliza el umbral de < 70 mg/dL).",
+    "q24": "Las <strong>hipoglicemias de ayuno</strong> son las que presentan una probabilidad significativamente mayor de corresponder a una enfermedad orgánica grave subyacente (como un insulinoma, insuficiencia suprarrenal o falla hepática/renal severa), a diferencia de las hipoglicemias posprandiales o reactivas.",
+    "q25": "Debido a que las lapiceras de insulina funcionan por un sistema de goteo o micromeconismo progresivo, al inyectar la dosis se debe <strong>mantener el botón presionado y contar hasta 10 segundos</strong> antes de retirar la aguja de la piel para asegurar el depósito completo de la dosis en el tejido subcutáneo.",
+    "q26": "La alfabetización en salud deficiente o <strong>poca educación formal</strong> es un factor de riesgo mayor para presentar episodios graves de hipoglicemia en diabetes, debido a errores de dosificación, fallas en la técnica de inyección, ayunos inadvertidos y mala interpretación del automonitoreo.",
+    "q27": "De acuerdo a los Criterios Diagnósticos Actualizados (Consenso SOCHIDIAB / ADA 2024-2025), la Cetoacidosis Diabética (CAD) exige demostrar la tríada: 1) <strong>Hiperglicemia</strong> (> 200 mg/dL o diagnóstico conocido de diabetes), 2) <strong>Bicarbonato < 18 mEq/L</strong> (y/o pH venoso < 7.30), y 3) <strong>Cetonemia o cetonuria</strong> positiva.",
+    "q28": "En la insuficiencia renal crónica se combina la prolongación de la vida media de la insulina (menor aclaramiento renal) con una <strong>disminución severa de la gluconeogénesis renal</strong> (el riñón aporta hasta un 20% de la producción endógena de glucosa en ayuno), predisponiendo al desarrollo de hipoglicemias profundas.",
+    "q29": "A diferencia de la Cetoacidosis Diabética, el Síndrome Hiperosmolar Hiperglicémico (SHH) no cursa con acidosis metabólica ni cetonemia masiva, por lo cual se caracteriza por la poca o nula aparición de síntomas <strong>gastrointestinales</strong> (como dolor abdominal, náuseas o vómitos), destacando en su lugar el compromiso neurológico y la deshidratación severa.",
+    "q30": "La glibenclamida es una sulfonilurea de excreción renal. El desarrollo de <strong>falla renal</strong> (disminución de la VFG) reduce el aclaramiento plasmático de la droga y sus metabolitos activos, provocando acumulación farmacológica e hipoglicemias profundas, prolongadas y de difícil manejo.",
+    "q31": "De acuerdo a la evidencia de protección renal (estudios DAPA-CKD, EMPA-KIDNEY) y guías internacionales/MINSAL, se debe recetar inhibidores de SGLT-2 para el manejo de la ERC a <strong>todos los pacientes</strong> con Diabetes Mellitus y compromiso renal (con VFG ≥ 20 mL/min/1.73m²), independientemente de su nivel de control glicémico.",
+    "q32": "El <strong>pie isquémico</strong> presenta ausencia de pulsos periféricos, piel fría/cianótica y dolor intenso en reposo o claudicación; mientras que el <strong>pie neuropático</strong> conserva pulsos palpables, presenta piel cálida, pérdida de la sensibilidad protectora (monofilamento de 10g) y desarrollo de deformidades articulares (como el pie de Charcot).",
+    "q33": "La tríada fisiopatológica clásica y fundamental del síndrome del pie diabético comprende la interacción de <strong>isquemia</strong> (enfermedad arterial periférica), <strong>neuropatía periférica</strong> (sensitiva, motora y autonómica) y <strong>alteraciones biomecánicas</strong> (deformidades articulares y puntos de presión focales).",
+    "q34": "El <strong>arroz</strong> es un alimento rico en almidón, clasificado como un carbohidrato o azúcar complejo (de digestión y absorción más lenta que los azúcares simples como dulces, azúcar de mesa o bebidas). La fibra no es un azúcar utilizable como fuente calórica directa.",
+    "q35": "En el sistema de conteo de hidratos de carbono para pacientes con diabetes, 1 porción de carbohidratos equivale a 15 gramos. Por lo tanto, un alimento que aporta 60 g de hidratos de carbono equivale exactamente a <strong>4 porciones</strong> (60 g / 15 g por porción = 4 porciones)."
+};
+     
+const preguntas = [
+    {
+        id: "q1",
+        enunciado: "¿Cuál es el efecto adverso que se presenta con mayor frecuencia en los pacientes que inician tratamiento con metformina?",
+        alternativas: {
+            "A": "Acidosis láctica",
+            "B": "Hipoglucemia sintomática",
+            "C": "Efectos gastrointestinales",
+            "D": "Aumento de peso corporal",
+            "E": "Deficiencia de vitamina B12"
+        }
+    },
+    {
+        id: "q2",
+        enunciado: "¿En cuál de las siguientes poblaciones de pacientes está contraindicado el uso de vildagliptina?",
+        alternativas: {
+            "A": "Pacientes con insuficiencia renal leve",
+            "B": "Pacientes con insuficiencia hepática",
+            "C": "Pacientes adultos mayores de 70 años",
+            "D": "Pacientes que cursan por una insulinoterapia",
+            "E": "Pacientes con hipertensión arterial sistémica"
+        }
+    },
+    {
+        id: "q3",
+        enunciado: "Paciente de 28 años, primigesta, con 26 semanas de gestación y antecedentes de obesidad. En su primer control prenatal presentó glicemia en ayunas de 88 mg/dL. Se le realiza prueba de tolerancia a la glucosa oral (PTGO) a las 26 semanas, obteniéndose: glicemia en ayunas de 92 mg/dL y glicemia a las 2 horas post carga de 148 mg/dL. ¿cuál es la conducta correspondiente?",
+        alternativas: {
+            "A": "Normal con factores de riesgo, indicar PTGO a las 30-33 semanas",
+            "B": "Diabetes gestacional",
+            "C": "Diabetes pregestacional",
+            "D": "Intolerancia a la glucosa oral",
+            "E": "Examen normal, mantener control prenatal habitual"
+        }
+    },
+    {
+        id: "q4",
+        enunciado: "Paciente de 32 años, gestante de 28 semanas con diagnóstico de diabetes gestacional, lleva 2 semanas en manejo con plan de alimentación y actividad física. En sus automonitoreos glucémicos destaca persistencia de glicemias en ayunas > 95 mg/dL y a las 2 horas postprandial > 120 mg/dL. ¿Cuál es la conducta más adecuada a seguir?",
+        alternativas: {
+            "A": "Iniciar tratamiento farmacológico con insulinoterapia",
+            "B": "Iniciar tratamiento farmacológico con metformina oral",
+            "C": "Iniciar tratamiento farmacológico con glibenclamida",
+            "D": "Mantener la terapia no farmacológica por 4 semanas",
+            "E": "Iniciar tratamiento farmacológico con iSGLT2"
+        }
+    },
+    {
+        id: "q5",
+        enunciado: "Se denomina prediabetes a la condición en que:",
+        alternativas: {
+            "A": "La masa de células beta del páncreas disminuye rápidamente vía apoptosis por un aumento de los niveles de glicemia.",
+            "B": "La resistencia a la insulina es tan alta que la producción de insulina por el páncreas no da abasto para mantener normales los niveles de glicemia.",
+            "C": "Existe una hiperinsulinemia que compensa la resistencia a la insulina presente, logrando mantener normales los niveles de glicemia.",
+            "D": "La producción de insulina por el páncreas disminuye porque existe resistencia a la insulina.",
+            "E": "La tasa de degradación de la insulina por la enzima degradadora de insulina (IDE) aumenta drásticamente, superando la capacidad de síntesis basal del páncreas."
+        }
+    },
+    {
+        id: "q6",
+        enunciado: "Paciente de 52 años, asintomático, acude a control de salud preventivo en su CESFAM. En su examen de tamizaje presenta una glicemia de ayuno de 118 mg/dL. se le solicita una HbA1c cuyo resultado es de 6,8%. ¿Cuál es la conducta a seguir?",
+        alternativas: {
+            "A": "Clasificar como Glicemia Alterada en Ayunas e indicar seguimiento en 1 año",
+            "B": "Solicitar una PTGO de confirmación, dado que la glicemia de ayuno no fue ≥ 126 mg/dL",
+            "C": "Repetir la glicemia de ayuno y la HbA1c por tratarse de un paciente asintomático",
+            "D": "Repetir la HbA1c en 3 meses previo a definir el diagnóstico definitivo",
+            "E": "Confirmar el diagnóstico de Diabetes Mellitus tipo 2 y activar confirmación GES"
+        }
+    },
+    {
+        id: "q7",
+        enunciado: "Una de las razones que se postulan para el desarrollo de la resistencia a la insulina en el síndrome metabólico es:",
+        alternativas: {
+            "A": "La hipertrofia del tejido adiposo subcutáneo.",
+            "B": "La mayor producción de adiponectina por el hígado como consecuencia de la esteatosis hepática.",
+            "C": "La hipertrofia del tejido adiposo visceral.",
+            "D": "La alteración genética del receptor de insulina, impidiendo que la insulina ejerza su efecto en los tejidos blancos.",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q8",
+        enunciado: "Paciente de 45 años, con IMC de 32 kg/m² y presencia de acantosis nigricans en el cuello, en quien se sospecha un síndrome metabólico. En la evaluación inicial, ¿cuál de los siguientes grupos de exámenes de laboratorio está indicado específicamente para la búsqueda de síndrome metabólico?",
+        alternativas: {
+            "A": "Perfil lipídico, glicemia en ayunas, TTGO y HbA1c",
+            "B": "Hemograma completo, perfil lipídico, uricemia y electrolitos plasmáticos",
+            "C": "Cortisol libre urinario, TSH, glicemia en ayunas y pruebas hepáticas",
+            "D": "Insulinemia basal y postprandial, perfil lipídico y curva de insulina",
+            "E": "Pruebas hepáticas, función renal, microalbuminuria y ecografía abdominal"
+        }
+    },
+    {
+        id: "q9",
+        enunciado: "¿Qué ocurre con la expresión de los cotransportadores de glucosa en pacientes con diabetes mellitus?",
+        alternativas: {
+            "A": "Disminución de SGLT1 e incremento compensatorio de GLUT2",
+            "B": "Aumento en la expresión y actividad de SGLT1 y SGLT2",
+            "C": "Disminución de SGLT2 e incremento en la expresión de GLUT4",
+            "D": "Disminución de la expresión de SGLT1 e incremento de SGLT2",
+            "E": "Aumento en la expresión de GLUT1 y GLUT4"
+        }
+    },
+    {
+        id: "q10",
+        enunciado: "¿Qué alteración en la secreción bifásica de insulina por las células beta pancreáticas caracteriza las etapas iniciales de la disfunción metabólica?",
+        alternativas: {
+            "A": "Disminución sostenida de ambas fases de secreción de insulina junto con una abolición precoz del pico inicial.",
+            "B": "Aumento significativo de la primera fase de secreción de insulina junto con una reducción de la segunda fase.",
+            "C": "Disminución de la primera fase de secreción de insulina junto con un incremento prolongado de la segunda fase.",
+            "D": "Disminución selectiva de la segunda fase de secreción de insulina junto con una preservación de la primera fase.",
+            "E": "Aumento persistente de la primera fase de secreción de insulina junto con una abolición total de la segunda fase."
+        }
+    },
+    {
+        id: "q11",
+        enunciado: "La dificultad para perder de peso en un estado de resistencia a la insulina se puede deber a:",
+        alternativas: {
+            "A": "Disminución de la producción de insulina por el páncreas por falla de las células beta pancreáticas.",
+            "B": "Resistencia a la insulina incrementada a tal nivel en el tejido adiposo que la insulina no es capaz de inhibir la lipólisis.",
+            "C": "Hiperinsulinemia prolongada por una inadecuada respuesta del páncreas al aumento de la glicemia.",
+            "D": "Los niveles de glicemia elevados estimulan la acumulación de triglicéridos en los adipocitos.",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q12",
+        enunciado: "Respecto a los niveles de insulina y glucosa en sangre en un estado de resistencia a la insulina:",
+        alternativas: {
+            "A": "Ambos aumentan sobre los niveles normales en estado postprandial.",
+            "B": "En un estado postprandial, la insulina aumenta sobre niveles normales y la glicemia se mantiene en niveles normales.",
+            "C": "Los niveles de insulina se mantienen normales pero la glicemia aumenta por el estado de resistencia a la insulina.",
+            "D": "Los bajos niveles de insulina por falla de las células beta pancreáticas generan episodios recurrentes de hipoglicemia.",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q13",
+        enunciado: "¿Qué alteración en la expresión de los transportadores de glucosa del sistema nervioso central se observa en pacientes con enfermedad de Alzheimer?",
+        alternativas: {
+            "A": "Disminución de la expresión de GLUT1 y GLUT3",
+            "B": "Aumento de GLUT1 con reducción compensatoria de GLUT3",
+            "C": "Disminución de GLUT4 a nivel neuronal",
+            "D": "Incremento en la expresión de GLUT1 y GLUT3",
+            "E": "Reducción de GLUT3 con aumento en la expresión de GLUT1"
+        }
+    },
+    {
+        id: "q14",
+        enunciado: "Hombre de 78 años, que usa insulina NPH a las 20 hrs y a las 8 hrs. Su HbA1c es de 9%, creatininemia 1 mg/dl. Hace hipoglicemias en la madrugada. La indicación más adecuada para evitar la hipoglicemia del paciente es:",
+        alternativas: {
+            "A": "colación 00 hrs.",
+            "B": "agregar metformina",
+            "C": "disminuir dosis de NPH PM",
+            "D": "retardar la inyección de NPH PM a las 23 hrs.",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q15",
+        enunciado: "Al intensificar la insulinoterapia mediante el uso de NPH en doble dosis, esquema prandial o premezclas, ¿cuál de los siguientes fármacos debe suspenderse?",
+        alternativas: {
+            "A": "Metformina",
+            "B": "Inhibidores de SGLT2",
+            "C": "Inhibidores de DPP-4",
+            "D": "Agonistas del receptor de GLP-1",
+            "E": "Sulfonilureas"
+        }
+    },
+    {
+        id: "q16",
+        enunciado: "¿Cuál tipo de dislipidemia es la más frecuente en pacientes con diabetes?",
+        alternativas: {
+            "A": "Hipercolesterolemia",
+            "B": "Hipertrigliceridemia aislada",
+            "C": "HDL bajo aislado",
+            "D": "Dislipidemia mixta",
+            "E": "Dislipidemia aterogénica"
+        }
+    },
+    {
+        id: "q17",
+        enunciado: "La indicación absoluta para iniciar tratamiento con fibratos en un paciente es cuando los triglicéridos se encuentran en el siguiente rango:",
+        alternativas: {
+            "A": "> 150 mg/dL",
+            "B": "> 300 mg/dL",
+            "C": "> 250 mg/dL",
+            "D": "> 400 mg/dL",
+            "E": "> 500 mg/dL"
+        }
+    },
+    {
+        id: "q18",
+        enunciado: "Los siguientes tipos de medicamentos tienen evidencia certificada de favorecer la ganancia de peso, excepto:",
+        alternativas: {
+            "A": "Antidepresivos",
+            "B": "Anticonvulsivantes",
+            "C": "Antihistamínicos",
+            "D": "Anticonceptivos",
+            "E": "Antipsicóticos"
+        }
+    },
+    {
+        id: "q19",
+        enunciado: "¿Cuál de las siguientes patologías corresponde a una causa secundaria de obesidad de origen endocrinológico?",
+        alternativas: {
+            "A": "Sindrome de Down",
+            "B": "Hipotiroidismo",
+            "C": "Mutación MC4R",
+            "D": "Diabetes insípida",
+            "E": "Lipedema"
+        }
+    },
+    {
+        id: "q20",
+        enunciado: "Antes de realizar el abordaje clínico de una hipoglicemia en un paciente sano con el ayuno de 72 horas, la primera causa en la que se debe pensar es:",
+        alternativas: {
+            "A": "Insulinoma",
+            "B": "Nesidioblastosis",
+            "C": "Hipoglicemia autoinmune",
+            "D": "Hipoglicemia accidental",
+            "E": "Cáncer de páncreas"
+        }
+    },
+    {
+        id: "q21",
+        enunciado: "Hombre de 22 años, 70 kg de peso, con debut de diabetes mellitus tipo 1. Se decide indicar un esquema de insulinoterapia basal-bolo. La dosis inicial de insulina basal que corresponde administrar es:",
+        alternativas: {
+            "A": "14 U al día",
+            "B": "18 U al día",
+            "C": "21 U al día",
+            "D": "35 U al día",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q22",
+        enunciado: "¿Cuál de las siguientes características al momento del debut clínico sugiere el diagnóstico de Diabetes Mellitus tipo 1?",
+        alternativas: {
+            "A": "Edad mayor a 45 años",
+            "B": "IMC menor a 25 kg/m²",
+            "C": "Glicemia inicial de 200 mg/dL",
+            "D": "Obesidad",
+            "E": "Estabilidad glicemica"
+        }
+    },
+    {
+        id: "q23",
+        enunciado: "El rango principal para clasificar una hipoglucemia en un paciente no diabético, además de la presencia de la triada de Whipple, es una glicemia:",
+        alternativas: {
+            "A": "< 70 mg/dL",
+            "B": "< 50 mg/dL",
+            "C": "< 60 mg/dL",
+            "D": "< 65 mg/dL",
+            "E": "< 55 mg/dL"
+        }
+    },
+    {
+        id: "q24",
+        enunciado: "En la evaluación de un paciente sin diabetes con cuadros de hipoglicemia, ¿cuál de las siguientes presentaciones temporales orienta a una mayor probabilidad de presentar una enfermedad orgánica grave de base?",
+        alternativas: {
+            "A": "Hipoglicemia posprandial precoz",
+            "B": "Hipoglicemia de ayuno",
+            "C": "Hipoglicemia reactiva a carbohidratos",
+            "D": "Hipoglicemia posprandial tardía",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q25",
+        enunciado: "En relación a la técnica correcta para la administración de insulina mediante lapiceras (plumas), ¿cuál de los siguientes enunciados es correcto?",
+        alternativas: {
+            "A": "La aguja debe retirarse de la piel inmediatamente después de pulsar el botón inyector para evitar lipohipertrofia",
+            "B": "Las agujas pueden reutilizarse hasta tres veces si se desinfectan adecuadamente con alcohol",
+            "C": "Para la administración con este dispositivo se deben emplear jeringas de tuberculina",
+            "D": "Se debe mantener el botón presionado y contar hasta 10 segundos antes de retirar de la piel",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q26",
+        enunciado: "Es un factor de riesgo para hacer hipoglicemia en un paciente con diabetes:",
+        alternativas: {
+            "A": "insomnio",
+            "B": "insuficiencia cardiaca",
+            "C": "poca educación",
+            "D": "hipertiroidismo",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q27",
+        enunciado: "¿Cuáles son los criterios diagnósticos para una cetoacidosis diabética?",
+        alternativas: {
+            "A": "Glicemia > 250 mg/dL, acidosis metabólica y cetonuria",
+            "B": "Hiperglicemia, pH venoso < 7.2 y cetonemia",
+            "C": "Glicemia > 200 mg/dL, pH arterial < 7.3 y cetonemia",
+            "D": "Glicemia > 200 mg/dL, Bicarbonato < 18 mEq/L y cetonuria",
+            "E": "Hiperglicemia, Bicarbonato < 18 mEq/L y cetonemia"
+        }
+    },
+    {
+        id: "q28",
+        enunciado: "En paciente con falla renal con disminución de la VFG, se produce más hipoglicemia pues el paciente tiene:",
+        alternativas: {
+            "A": "anorexia",
+            "B": "disminución de gluconeogénesis",
+            "C": "disminución de vida media de insulina",
+            "D": "atrofia muscular",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q29",
+        enunciado: "En contraste con la cetoacidosis diabética, el síndrome hiperosmolar hiperglicémico se diferencia de ésta por la poca o nula aparición de síntomas de carácter:",
+        alternativas: {
+            "A": "Renales",
+            "B": "Cardiacos",
+            "C": "Gastrointestinales",
+            "D": "Neurológicos",
+            "E": "Musculares"
+        }
+    },
+    {
+        id: "q30",
+        enunciado: "Mujer de 65 años, usuaria de glibenclamida. Es llevada a urgencias por compromiso de conciencia, que cede con solución glucosada EV. La causa más probable de esta complicación aguda es:",
+        alternativas: {
+            "A": "falla renal",
+            "b": "insuficiencia cardiaca",
+            "C": "infección urinaria baja",
+            "D": "reposo prolongado",
+            "E": "Ninguna de las anteriores"
+        }
+    },
+    {
+        id: "q31",
+        enunciado: "En cuanto a la nefropatía diabética, ¿A qué pacientes se les debe recetar inhibidores de SGLT-2 para manejar la ERC?",
+        alternativas: {
+            "A": "Solo descompensados",
+            "B": "De larga evolución",
+            "C": "De poca evolución",
+            "D": "A todos",
+            "E": "A ninguno"
+        }
+    },
+    {
+        id: "q32",
+        enunciado: "¿Cuál de las siguientes alternativas describe correctamente las diferencias clínicas entre un pie isquémico y un pie neuropático?",
+        alternativas: {
+            "A": "El pie isquémico suele ser cálido, con pulsos conservados y pérdida de la sensibilidad protectora; el pie neuropático es frío, con pulsos ausentes y dolor intenso en reposo",
+            "B": "El pie isquémico se caracteriza por ausencia de pulsos y dolor en reposo; el pie neuropático presenta pérdida de la sensibilidad protectora y deformidades del pie",
+            "C": "El pie isquémico y el pie neuropático presentan las mismas características clínicas, diferenciándose sólo mediante estudios de imágenes vasculares",
+            "D": "El pie neuropático se caracteriza por pulsos ausentes, piel fría y cianótica, mientras que el pie isquémico presenta pulsos normales y sensibilidad conservada",
+            "E": "El pie neuropático siempre presenta úlceras dolorosas en los dedos, mientras que el pie isquémico desarrolla únicamente úlceras plantares indoloras"
+        }
+    },
+    {
+        id: "q33",
+        enunciado: "¿Cuáles de los siguientes factores están involucrados en la fisiopatología del síndrome del pie diabético?",
+        alternativas: {
+            "A": "Isquemia, neuropatía periférica y alteraciones biomecánicas",
+            "B": "Infección, isquemia y neuropatía periférica",
+            "C": "Neuropatía periférica, infección y alteraciones biomecánicas",
+            "D": "Enfermedad renal crónica, isquemia y alteraciones biomecánicas",
+            "E": "Alteraciones biomecánicas, enfermedad renal crónica e hiperglicemia"
+        }
+    },
+    {
+        id: "q34",
+        enunciado: "¿Cuál de los siguientes alimentos se considera un carbohidrato o azúcar complejo?",
+        alternativas: {
+            "A": "Arroz",
+            "B": "Bebidas",
+            "C": "Dulces",
+            "D": "Azúcar",
+            "E": "Fibra"
+        }
+    },
+    {
+        id: "q35",
+        enunciado: "Un paciente en control nutricional por Diabetes Mellitus consume 1 envase de yogur que aporta 60 g de hidratos de carbono. ¿a cuántas porciones de hidratos de carbono equivale esta ingesta?",
+        alternativas: {
+            "A": "1 porción",
+            "B": "2 porciones",
+            "C": "3 porciones",
+            "D": "4 porciones",
+            "E": "6 porciones"
+        }
+    }
+];
+
+// ==========================================
+        //  FIN DE LA CONFIGURACIÓN DE DATOS
+        // ==========================================
+
+        let currentIndex = 0;
+        let respuestasUsuario = {};
+        let estadoEvaluacion = {};
+        let tiempoRestante = 0;
+        let timerInterval;
+        let isPaused = false;
+        let etapaApp = 'inicio'; 
+        let testFinalizado = false;
+
+        let velocidadActual = 1.0;
+        let vozSeleccionadaName = "";
+        let textoLimpioActual = "";
+        let acumuladoIndex = 0;
+        let indexRelativoActual = 0;
+        let esCambioParametro = false;
+
+        function getPreguntasActuales() {
+            for(let i = preguntas.length - 1; i >= 0; i--) { if(!preguntas[i] || !preguntas[i].id) preguntas.splice(i, 1); }
+            return preguntas;
+        }
+
+        function mezclarArreglo(arreglo) {
+            for (let i = arreglo.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arreglo[i], arreglo[j]] = [arreglo[j], arreglo[i]];
+            }
+        }
+
+        /* SONIDOS 8-BITS SINTETIZADOS */
+        let globalAudioCtx;
+        let sfxEnabled = true;
+
+        const svgBellOn = `<svg class="px-icon" viewBox="0 0 16 16" width="22" height="22"><path d="M7,1 h2 v1 h-2 z M6,2 h4 v1 h-4 z M5,3 h6 v6 h-6 z M4,9 h8 v2 h-8 z M2,11 h12 v2 h-12 z M6,13 h4 v1 h-4 z M7,14 h2 v1 h-2 z"/></svg>`;
+        const svgBellOff = `<svg class="px-icon" viewBox="0 0 16 16" width="22" height="22" opacity="0.3"><path d="M7,1 h2 v1 h-2 z M6,2 h4 v1 h-4 z M5,3 h6 v6 h-6 z M4,9 h8 v2 h-8 z M2,11 h12 v2 h-12 z M6,13 h4 v1 h-4 z M7,14 h2 v1 h-2 z"/></svg>`;
+        const svgSpeakerOn = `<svg class="px-icon" viewBox="0 0 16 16" width="22" height="22"><path d="M8,2 h2 v12 h-2 z M6,3 h2 v10 h-2 z M4,4 h2 v8 h-2 z M2,6 h2 v4 h-2 z M11,6 h1 v4 h-1 z M13,4 h1 v8 h-1 z"/></svg>`;
+        const svgSpeakerOff = `<svg class="px-icon" viewBox="0 0 16 16" width="22" height="22"><path d="M8,2 h2 v12 h-2 z M6,3 h2 v10 h-2 z M4,4 h2 v8 h-2 z M2,6 h2 v4 h-2 z M11,6 h1 v1 h-1 z M15,6 h1 v1 h-1 z M12,7 h1 v1 h-1 z M14,7 h1 v1 h-1 z M13,8 h1 v1 h-1 z M12,9 h1 v1 h-1 z M14,9 h1 v1 h-1 z M11,10 h1 v1 h-1 z M15,10 h1 v1 h-1 z"/></svg>`;
+
+        function toggleSFX() {
+            sfxEnabled = !sfxEnabled;
+            const btnSFX = document.getElementById('btnToggleSFX');
+            if (btnSFX) btnSFX.innerHTML = sfxEnabled ? svgBellOn : svgBellOff;
+        }
+        
+        function getAudioCtx() {
+            if (!globalAudioCtx) { globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+            if (globalAudioCtx.state === 'suspended') { globalAudioCtx.resume(); }
+            return globalAudioCtx;
+        }
+        
+        function playOptionHoverSound() { if (!sfxEnabled) return; try { const a = getAudioCtx(); const o = a.createOscillator(); const g = a.createGain(); o.type = 'square'; o.frequency.setValueAtTime(400, a.currentTime); g.gain.setValueAtTime(0.02, a.currentTime); g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.05); o.connect(g); g.connect(a.destination); o.start(a.currentTime); o.stop(a.currentTime + 0.05); } catch(e){} }
+        function playClickSound() { if (!sfxEnabled) return; try { const a = getAudioCtx(); const o = a.createOscillator(); const g = a.createGain(); o.type = 'square'; o.frequency.setValueAtTime(800, a.currentTime); o.frequency.exponentialRampToValueAtTime(1200, a.currentTime + 0.05); g.gain.setValueAtTime(0.1, a.currentTime); g.gain.exponentialRampToValueAtTime(0.01, a.currentTime + 0.1); o.connect(g); g.connect(a.destination); o.start(a.currentTime); o.stop(a.currentTime + 0.1); } catch (e) {} }
+        function playCorrectSound() { if (!sfxEnabled) return; try { const a = getAudioCtx(); const t = a.currentTime; [523.25, 659.25, 783.99].forEach((f, i) => { const o = a.createOscillator(); const g = a.createGain(); o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(0, t + i*0.1); g.gain.linearRampToValueAtTime(0.08, t + i*0.1 + 0.05); g.gain.exponentialRampToValueAtTime(0.01, t + i*0.1 + 0.3); o.connect(g); g.connect(a.destination); o.start(t + i*0.1); o.stop(t + i*0.1 + 0.3); }); } catch(e){} }
+        
+        function playHardcoreJingle() { 
+            if (!sfxEnabled) return; 
+            try { 
+                const a = getAudioCtx(); 
+                const t = a.currentTime; 
+                const notas = [523.25, 659.25, 783.99, 1046.50, 1567.98, 2093.00]; 
+                notas.forEach((f, i) => { 
+                    const o = a.createOscillator(); 
+                    const g = a.createGain(); 
+                    o.type = 'square'; 
+                    o.frequency.value = f; 
+                    const ti = t + i * 0.08; 
+                    g.gain.setValueAtTime(0, ti); 
+                    g.gain.linearRampToValueAtTime(0.15, ti + 0.01); 
+                    g.gain.exponentialRampToValueAtTime(0.001, ti + 0.2); 
+                    o.connect(g); 
+                    g.connect(a.destination); 
+                    o.start(ti); 
+                    o.stop(ti + 0.2); 
+                }); 
+            } catch (e) {} 
+        }
+
+        const dances = ['dance-jump', 'dance-wiggle', 'dance-squish', 'dance-flip'];
+        function triggerPancreasDance(e) {
+            if (e) e.stopPropagation();
+            playOptionHoverSound();
+            const panc = document.querySelector('.retro-pancreas');
+            if(!panc) return;
+            
+            dances.forEach(d => panc.classList.remove(d));
+            void panc.offsetWidth; 
+            
+            const randomDance = dances[Math.floor(Math.random() * dances.length)];
+            panc.classList.add(randomDance);
+            
+            if (sfxEnabled) {
+                try {
+                    const a = getAudioCtx();
+                    const o = a.createOscillator();
+                    const g = a.createGain();
+                    o.type = 'square';
+                    o.frequency.setValueAtTime(800 + Math.random()*400, a.currentTime);
+                    o.frequency.exponentialRampToValueAtTime(400, a.currentTime + 0.1);
+                    g.gain.setValueAtTime(0.05, a.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.1);
+                    o.connect(g); g.connect(a.destination);
+                    o.start(a.currentTime); o.stop(a.currentTime + 0.1);
+                } catch(err){}
+            }
+        }
+
+        const bgMusicStart = document.getElementById('bgMusicStart');
+        const bgMusicTrivia = document.getElementById('bgMusicTrivia');
+        const bgMusicResults = document.getElementById('bgMusicResults');
+        let appMusicEnabled = true; let globalVol = 0.25;
+
+        function unlockAudio() {
+            if (!appMusicEnabled || etapaApp !== 'inicio') return;
+            bgMusicStart.volume = globalVol;
+            let playPromise = bgMusicStart.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    document.getElementById('btnToggleMusic').innerHTML = 'MÚSICA ON';
+                }).catch(error => { console.log("Aún bloqueado por el navegador."); });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            bgMusicStart.volume = globalVol; 
+            document.body.addEventListener('click', unlockAudio, { once: true });
+            document.body.addEventListener('touchstart', unlockAudio, { once: true });
+            
+            let playPromise = bgMusicStart.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    document.getElementById('btnToggleMusic').innerHTML = '▶ CLIC PARA MÚSICA';
+                });
+            }
+        });
+
+        function intentarReproducirInicio() { 
+            if (etapaApp !== 'inicio' || !appMusicEnabled) return; 
+            bgMusicStart.play().catch(()=>{}); 
+        }
+
+        function toggleStartMusic(e) { 
+            if (e) e.stopPropagation(); 
+            appMusicEnabled = !appMusicEnabled; 
+            const btnStartMus = document.getElementById('btnToggleMusic');
+            const b1 = document.getElementById('btnToggleTriviaMusic');
+            
+            if (!appMusicEnabled) { 
+                bgMusicStart.pause(); 
+                if(btnStartMus) btnStartMus.innerHTML = 'MÚSICA OFF'; 
+                if(b1) b1.innerHTML = svgSpeakerOff;
+            } else { 
+                bgMusicStart.volume = globalVol;
+                bgMusicStart.play().catch(()=>{}); 
+                if(btnStartMus) btnStartMus.innerHTML = 'MÚSICA ON'; 
+                if(b1) b1.innerHTML = svgSpeakerOn;
+            } 
+        }
+
+        function fadeOut(au, cb) { if (au.paused) { if(cb) cb(); return; } let v = au.volume; const iv = setInterval(() => { if (v > 0.05) { v -= 0.05; au.volume = v; } else { clearInterval(iv); au.pause(); au.volume = globalVol; if(cb) cb(); } }, 100); }
+        
+        function getActiveAudio() { 
+            if (etapaApp === 'resultados') return bgMusicResults; 
+            return bgMusicTrivia; 
+        }
+        
+        function toggleTriviaMusic() {
+            appMusicEnabled = !appMusicEnabled;
+            const b1 = document.getElementById('btnToggleTriviaMusic'); 
+            const btnStartMus = document.getElementById('btnToggleMusic');
+            let a = getActiveAudio();
+            
+            if (!appMusicEnabled) { 
+                a.pause(); 
+                if(b1) b1.innerHTML = svgSpeakerOff; 
+                if(btnStartMus) btnStartMus.innerHTML = 'MÚSICA OFF';
+            } else { 
+                a.volume = globalVol; 
+                if(!isPaused) a.play().catch(()=>{}); 
+                if(b1) b1.innerHTML = svgSpeakerOn; 
+                if(btnStartMus) btnStartMus.innerHTML = 'MÚSICA ON';
+            }
+        }
+
+        function changeTriviaVolume(v) {
+            globalVol = parseFloat(v); 
+            let a = getActiveAudio(); 
+            a.volume = globalVol;
+            if (etapaApp === 'inicio') bgMusicStart.volume = globalVol;
+            
+            const b1 = document.getElementById('btnToggleTriviaMusic'); 
+            const s1 = document.getElementById('triviaVolume'); 
+            const s2 = document.getElementById('startVolume'); 
+            const btnStartMus = document.getElementById('btnToggleMusic');
+
+            if(s1 && s1.value !== v) s1.value = v; 
+            if(s2 && s2.value !== v) s2.value = v; 
+            
+            if(v == 0) { 
+                appMusicEnabled = false; 
+                if(b1) b1.innerHTML = svgSpeakerOff; 
+                if(btnStartMus) btnStartMus.innerHTML = 'MÚSICA OFF';
+            } else if (!appMusicEnabled) { 
+                appMusicEnabled = true; 
+                if(b1) b1.innerHTML = svgSpeakerOn; 
+                if(btnStartMus) btnStartMus.innerHTML = 'MÚSICA ON';
+                if(!isPaused && etapaApp !== 'inicio') a.play().catch(()=>{}); 
+                if(etapaApp === 'inicio') bgMusicStart.play().catch(()=>{}); 
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            const confirmOverlay = document.getElementById('confirmSubmitOverlay');
+            const isConfirming = confirmOverlay && confirmOverlay.style.display === 'flex';
+            
+            if (event.key === 'Escape' && etapaApp !== 'inicio') {
+                if(isConfirming) { closeConfirmSubmit(); return; }
+                if(isPaused) closePauseMenu(); else showPauseMenu();
+            } else if (etapaApp === 'trivia' && !isPaused && !isConfirming) {
+                if (event.key === 'ArrowRight') navQuestion(1);
+                else if (event.key === 'ArrowLeft') navQuestion(-1);
+            }
+        });
+        
+        function showPauseMenu() {
+            isPaused = true; playClickSound();
+            document.getElementById('pauseMenuOverlay').style.display = 'flex';
+            if(appMusicEnabled) getActiveAudio().pause();
+        }
+        function closePauseMenu() { isPaused = false; playClickSound(); document.getElementById('pauseMenuOverlay').style.display = 'none'; if(appMusicEnabled) getActiveAudio().play().catch(()=>{}); }
+        
+        function returnToMainMenu() {
+            isPaused = false; document.getElementById('pauseMenuOverlay').style.display = 'none'; silenciarFondo(); clearInterval(timerInterval);
+            bgMusicTrivia.pause(); bgMusicTrivia.currentTime = 0; bgMusicResults.pause(); bgMusicResults.currentTime = 0; 
+            currentIndex = 0; respuestasUsuario = {}; estadoEvaluacion = {}; tiempoRestante = 0; testFinalizado = false;
+            document.getElementById('timerDisplay').style.display = 'none'; document.getElementById('btnPuntajeFinal').style.display = 'none'; document.getElementById('btnFinalizar').style.display = 'none';
+            
+            document.getElementById('appContainer').style.display = 'none'; 
+            document.getElementById('startScreen').style.display = 'flex'; document.getElementById('startScreen').style.opacity = '1';
+            
+            etapaApp = 'inicio'; const btnStartMus = document.getElementById('btnToggleMusic');
+            if (appMusicEnabled) { bgMusicStart.volume = globalVol; bgMusicStart.play().catch(()=>{}); btnStartMus.innerHTML = 'MÚSICA ON'; } 
+            else { btnStartMus.innerHTML = 'MÚSICA OFF'; }
+        }
+
+        function iniciarHardcore() {
+            const overlay = document.getElementById('modoOverlay');
+            playHardcoreJingle(); 
+            
+            const pancTransitionSVG = `
+            <svg class="anim-start-pancreas" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" style="shape-rendering: crispEdges;">
+                <path fill="#000" d="M 3,7 h2 v-2 h4 v-1 h6 v1 h4 v1 h2 v4 h-1 v3 h-3 v1 h-7 v1 h-4 v-1 h-2 v-2 h-1 v-5 z"/>
+                <path fill="#d95079" d="M 4,7 h1 v-1 h4 v-1 h6 v1 h4 v1 h1 v4 h-1 v2 h-3 v1 h-6 v1 h-4 v-1 h-2 v-2 h-1 v-4 z"/>
+                <path fill="#ff7ba3" d="M 4,7 h1 v-1 h4 v-1 h6 v1 h4 v1 h1 v3 h-17 v-3 z"/>
+                <path fill="#ffb8cd" d="M 6,6 h2 v1 h-2 z M 11,6 h3 v1 h-3 z M 16,7 h2 v1 h-2 z"/>
+                <rect fill="#b8385e" x="6" y="9" width="1" height="1"/><rect fill="#b8385e" x="8" y="11" width="1" height="1"/><rect fill="#b8385e" x="5" y="12" width="1" height="1"/>
+                <rect fill="#e53e3e" x="10" y="10" width="1" height="1"/><rect fill="#e53e3e" x="19" y="10" width="1" height="1"/>
+                <!-- Cara Feliz Fija -->
+                <rect fill="#000" x="12" y="8" width="2" height="1"/><rect fill="#000" x="11" y="9" width="1" height="1"/><rect fill="#000" x="14" y="9" width="1" height="1"/>
+                <rect fill="#000" x="17" y="8" width="2" height="1"/><rect fill="#000" x="16" y="9" width="1" height="1"/><rect fill="#000" x="19" y="9" width="1" height="1"/>
+                <rect fill="#000" x="14" y="11" width="3" height="2"/><rect fill="#d95079" x="15" y="12" width="1" height="1"/>
+            </svg>`;
+
+            overlay.innerHTML = pancTransitionSVG + `<span style="color:#fde047; text-shadow: 4px 4px 0px #b45309; z-index:10; margin-top:20px;">¡LET'S GO!</span>`; 
+            overlay.style.display = 'flex';
+            
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                
+                let audioNuevoActivo = bgMusicTrivia;
+                fadeOut(bgMusicStart, () => {
+                    audioNuevoActivo.volume = globalVol; 
+                    if(appMusicEnabled) audioNuevoActivo.play().catch(e=>console.log(e));
+                });
+                
+                document.getElementById('startScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('startScreen').style.display = 'none';
+                    etapaApp = 'trivia'; testFinalizado = false;
+                    
+                    const arregloBase = getPreguntasActuales(); 
+                    mezclarArreglo(arregloBase);
+                    
+                    document.getElementById('appContainer').style.display = 'flex';
+                    tiempoRestante = arregloBase.length * 70; 
+                    document.getElementById('timerDisplay').style.display = 'flex'; 
+                    iniciarTimer();
+                    renderQuestion();
+                }, 400);
+            }, 1500);
+        }
+
+        function iniciarTimer() {
+            actualizarDisplayTimer();
+            timerInterval = setInterval(() => {
+                tiempoRestante--; actualizarDisplayTimer();
+                if (tiempoRestante <= 0) { clearInterval(timerInterval); forzarFinalizacion(true); }
+            }, 1000);
+        }
+
+        function actualizarDisplayTimer() {
+            const h = Math.floor(tiempoRestante / 3600); const m = Math.floor((tiempoRestante % 3600) / 60); const s = tiempoRestante % 60;
+            document.getElementById('timerText').innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            const el = document.getElementById('timerDisplay');
+            if (tiempoRestante <= 30 && tiempoRestante > 0) { el.style.borderColor = 'var(--incorrect)'; el.style.color = 'var(--incorrect)'; } 
+            else { el.style.borderColor = ''; el.style.color = ''; } /* Al borrar los estilos forzados, hereda automáticamente el borde colorido de los paneles */
+        }
+        
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); playClickSound(); }
+
+        function renderQuestion() {
+            const arr = getPreguntasActuales(); const q = arr[currentIndex]; const isEvaluado = estadoEvaluacion[q.id] || false;
+            document.getElementById('qTitle').innerText = `Pregunta ${currentIndex + 1}`;
+            const qContainer = document.getElementById('qContainer'); let html = '';
+
+            html += `<div>${q.enunciado}</div><div style="margin-top:20px;">`;
+            for (const [key, value] of Object.entries(q.alternativas)) {
+                let isChecked = respuestasUsuario[q.id] === key ? 'checked' : ''; let statusClass = '';
+                if (isEvaluado) { if (key === clavijero[q.id]) statusClass = 'correct'; else if (isChecked) statusClass = 'incorrect'; } 
+                else if (isChecked) { statusClass = 'selected'; }
+                html += `<label class="alternativa ${statusClass}" onmouseenter="playOptionHoverSound()"><input type="radio" name="alt" value="${key}" ${isChecked} ${isEvaluado ? 'disabled' : ''} onclick="saveAndEvaluate('${key}')">${key}) ${value}</label>`;
+            }
+            html += `</div>`;
+
+            let pautaHtmlTxt = pautas[q.id];
+            if (isEvaluado && pautaHtmlTxt) {
+                html += `<div class="pauta-box"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:2px dashed var(--border-color); padding-bottom:10px; flex-wrap:wrap; gap:8px;"><strong>INFO DEL POKÉDEX:</strong><div class="audio-controls"><button class="audio-btn" id="btnAudioToggle" onclick="handleAudioToggle()">▶ AUDIO</button><select id="vVelocidad" class="speed-select" onchange="cambiarVelocidad()"><option value="1.0" ${velocidadActual == 1.0 ? 'selected' : ''}>1.0x</option><option value="1.5" ${velocidadActual == 1.5 ? 'selected' : ''}>1.5x</option><option value="2.0" ${velocidadActual == 2.0 ? 'selected' : ''}>2.0x</option></select><select id="vVoz" class="voice-select" onchange="cambiarVoz()"></select></div></div>${pautaHtmlTxt}</div>`;
+            }
+
+            qContainer.innerHTML = html;
+            if (isEvaluado && pautaHtmlTxt) poblarSelectorVoces();
+
+            const btnAnterior = document.getElementById('btnAnterior'); const btnSiguiente = document.getElementById('btnSiguiente'); const btnPuntajeFinal = document.getElementById('btnPuntajeFinal');
+            if (btnAnterior) btnAnterior.style.display = currentIndex === 0 ? 'none' : 'inline-block';
+            if (currentIndex === arr.length - 1) { if (btnSiguiente) btnSiguiente.style.display = testFinalizado ? 'inline-block' : 'none'; if (btnPuntajeFinal) btnPuntajeFinal.style.display = testFinalizado ? 'none' : 'inline-block'; } 
+            else { if (btnSiguiente) btnSiguiente.style.display = 'inline-block'; if (btnPuntajeFinal) btnPuntajeFinal.style.display = 'none'; }
+            
+            const btnVolver = document.getElementById('btnVolverInicio');
+            if (btnVolver) btnVolver.style.display = testFinalizado ? 'inline-block' : 'none';
+            if (btnSiguiente) btnSiguiente.style.marginLeft = currentIndex === 0 ? 'auto' : '0';
+            
+            updateNav(); 
+            if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) MathJax.typesetPromise();
+        }
+
+        function saveAndEvaluate(key) {
+            const arr = getPreguntasActuales(); const q = arr[currentIndex]; 
+            respuestasUsuario[q.id] = key;
+            playClickSound(); 
+            renderQuestion();
+        }
+
+        function procesarFinalizacion() {
+            playClickSound(); if (testFinalizado) { mostrarResultadosVisuales(); return; }
+            document.getElementById('confirmSubmitOverlay').style.display = 'flex';
+        }
+        
+        function closeConfirmSubmit() { playClickSound(); document.getElementById('confirmSubmitOverlay').style.display = 'none'; }
+        
+        function confirmSubmit() {
+            playClickSound(); document.getElementById('confirmSubmitOverlay').style.display = 'none';
+            forzarFinalizacion(false); 
+        }
+        
+        function forzarFinalizacion(porTiempo) {
+            clearInterval(timerInterval); document.getElementById('timerDisplay').style.display = 'none';
+            if (isPaused) { isPaused = false; document.getElementById('pauseMenuOverlay').style.display = 'none'; }
+            getPreguntasActuales().forEach(q => estadoEvaluacion[q.id] = true);
+            if (porTiempo) alert("¡TIEMPO AGOTADO!");
+            mostrarTransicionResultados();
+        }
+        
+        function mostrarTransicionResultados() {
+            silenciarFondo(); etapaApp = 'resultados'; fadeOut(bgMusicTrivia);
+            if(sfxEnabled) playCorrectSound(); 
+            const overlay = document.getElementById('modoOverlay');
+            overlay.innerHTML = '<div class="anim-trophy">🏆</div><span>¡VICTORIA!</span>'; overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.display = 'none'; mostrarResultadosVisuales();
+                bgMusicResults.volume = globalVol; if(appMusicEnabled) bgMusicResults.play().catch(e=>console.log(e));
+            }, 2000);
+        }
+
+        function mostrarResultadosVisuales() {
+            testFinalizado = true; const arr = getPreguntasActuales(); currentIndex = arr.length; 
+            let correctas = 0;
+            arr.forEach(q => { 
+                let ans = clavijero[q.id]; 
+                if (respuestasUsuario[q.id] === ans) correctas++; 
+            });
+            const p = correctas; const pMax = arr.length; const e = 0.6; const corte = e * pMax; let nota = 0;
+            if (p < corte) nota = (3.0 * (p / corte)) + 1.0; else nota = (3.0 * ((p - corte) / (pMax * (1 - e)))) + 4.0;
+            const notaFinal = nota.toFixed(1); const colorNota = nota < 4.0 ? 'var(--incorrect)' : 'var(--primary)'; 
+
+            document.getElementById('qTitle').innerText = "RANGO FINAL";
+            document.getElementById('qContainer').innerHTML = `<div class="resultado-box"><h3>TU NOTA</h3><div class="resultado-score" style="color: ${colorNota};">${notaFinal}</div><div style="font-size: 0.5em; color: var(--text-color);">ACERTADAS: <strong>${correctas}</strong> / ${pMax}</div><p style="margin-top:40px; font-size:0.6em; color:var(--text-color); font-family: 'VT323', monospace;">Usa el mapa lateral para revisar tus errores.</p></div>`;
+            document.getElementById('controlsContainer').style.display = 'flex';
+            const btnA = document.getElementById('btnAnterior'); if (btnA) btnA.style.display = 'inline-block';
+            const btnS = document.getElementById('btnSiguiente'); if (btnS) btnS.style.display = 'none';
+            document.getElementById('btnPuntajeFinal').style.display = 'none';
+            const btnV = document.getElementById('btnVolverInicio'); if (btnV) btnV.style.display = 'inline-block';
+            updateNav();
+        }
+
+        function navQuestion(dir) {
+            const arr = getPreguntasActuales();
+            if (currentIndex + dir === arr.length && !testFinalizado) { procesarFinalizacion(); return; }
+            if (currentIndex + dir >= 0 && currentIndex + dir <= arr.length) {
+                playClickSound(); silenciarFondo(); currentIndex += dir;
+                if (currentIndex === arr.length) { mostrarResultadosVisuales(); } else { renderQuestion(); }
+            }
+        }
+        function irAPregunta(index) { playClickSound(); silenciarFondo(); currentIndex = index; renderQuestion(); }
+
+        function updateNav() {
+            let html = ''; const arr = getPreguntasActuales();
+            arr.forEach((q, index) => {
+                let active = index === currentIndex ? 'active' : ''; let respondidaClass = '';
+                if (estadoEvaluacion[q.id]) { 
+                    let ans = clavijero[q.id]; 
+                    respondidaClass = (respuestasUsuario[q.id] === ans) ? 'correct' : 'incorrect'; 
+                } else if (respuestasUsuario[q.id]) { 
+                    respondidaClass = 'answered'; 
+                }
+                html += `<div class="nav-item ${active} ${respondidaClass}" onclick="irAPregunta(${index})" onmouseenter="playOptionHoverSound()">${index + 1}</div>`;
+            });
+            if (testFinalizado) {
+                let activeRes = currentIndex === arr.length ? 'active' : '';
+                html += `<div class="nav-item ${activeRes}" style="background-color: var(--primary); color: white;" onclick="mostrarResultadosVisuales()" onmouseenter="playOptionHoverSound()">★</div>`;
+            }
+            document.getElementById('navGrid').innerHTML = html;
+            const actEl = document.querySelector('.nav-item.active'); if (actEl) actEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function handleAudioToggle() {
+            if (window.speechSynthesis.speaking) {
+                if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); const btn = document.getElementById('btnAudioToggle'); if(btn) btn.innerHTML = '⏸ PAUSA'; } 
+                else { window.speechSynthesis.pause(); const btn = document.getElementById('btnAudioToggle'); if(btn) btn.innerHTML = '▶ PLAY'; }
+            } else { hablarPautaActual(true); }
+        }
+        
+        function hablarPautaActual(desdeInicio = true) {
+            const arr = getPreguntasActuales(); if (!arr || currentIndex >= arr.length) return;
+            const q = arr[currentIndex];
+            let pautaHtmlTxt = pautas[q.id];
+            
+            if (!pautaHtmlTxt) return;
+            if (desdeInicio) {
+                textoLimpioActual = pautaHtmlTxt.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"'); 
+                acumuladoIndex = 0; indexRelativoActual = 0;
+            } else { acumuladoIndex += indexRelativoActual; indexRelativoActual = 0; }
+            
+            let txt = textoLimpioActual.substring(acumuladoIndex); if (!txt.trim()) return;
+            esCambioParametro = true; window.speechSynthesis.cancel(); esCambioParametro = false;
+            
+            const u = new SpeechSynthesisUtterance(txt); u.lang = 'es-CL'; u.rate = velocidadActual;
+            const voces = window.speechSynthesis.getVoices(); const vE = voces.find(v => v.name === vozSeleccionadaName); if (vE) u.voice = vE;
+            u.onboundary = function(e) { if (e.name === 'word') indexRelativoActual = e.charIndex; };
+            u.onend = function() { if (!esCambioParametro) { const btn = document.getElementById('btnAudioToggle'); if(btn) btn.innerHTML = '▶ AUDIO'; acumuladoIndex = 0; indexRelativoActual = 0; } };
+            const btn = document.getElementById('btnAudioToggle'); if(btn) btn.innerHTML = '⏸ PAUSA'; 
+            window.speechSynthesis.speak(u);
+        }
+        
+        function silenciarFondo() { window.speechSynthesis.cancel(); const btn = document.getElementById('btnAudioToggle'); if (btn) btn.innerHTML = '▶ AUDIO'; }
+        function cambiarVoz() { const s = document.getElementById('vVoz'); if (s) { vozSeleccionadaName = s.value; if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) hablarPautaActual(false); } }
+        function cambiarVelocidad() { const s = document.getElementById('vVelocidad'); if (s) { velocidadActual = parseFloat(s.value); if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) { hablarPautaActual(false); } } }
+        
+        function poblarSelectorVoces() {
+            const s = document.getElementById('vVoz'); if (!s) return;
+            const voces = window.speechSynthesis.getVoices(); let vAM = voces.filter(v => v.lang.startsWith('es')); if (vAM.length === 0) vAM = voces;
+            s.innerHTML = '';
+            vAM.forEach(v => { const o = document.createElement('option'); o.value = v.name; o.text = v.name.replace(/Microsoft|Google|Desktop|Natural/gi, '').trim() + ` (${v.lang})`; s.appendChild(o); });
+            if (vozSeleccionadaName) s.value = vozSeleccionadaName; else if (vAM.length > 0) { const vCl = vAM.find(v => v.lang === 'es-CL' || v.lang === 'es_CL'); s.value = vCl ? vCl.name : vAM[0].name; vozSeleccionadaName = s.value; }
+        }
+        window.speechSynthesis.onvoiceschanged = poblarSelectorVoces;
+
+        function aplicarTema(t) {
+            document.body.setAttribute('data-theme', t); 
+            try { localStorage.setItem('digestivo-theme', t); } catch (e) {}
+            
+            // Lógica para alternar la visualización del Sol y la Luna
+            const moon = document.getElementById('icon-moon');
+            const sun = document.getElementById('icon-sun');
+            if (moon && sun) {
+                if (t === 'dark') {
+                    moon.style.display = 'none';
+                    sun.style.display = 'block';
+                } else {
+                    moon.style.display = 'block';
+                    sun.style.display = 'none';
+                }
+            }
+        }
+        function toggleTheme(e) { if (e) e.stopPropagation(); playClickSound(); aplicarTema(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+        function inicializarTema() {
+            let tg = 'light'; try { tg = localStorage.getItem('digestivo-theme') || 'light'; } catch (e) {}
+            if (!localStorage.getItem('digestivo-theme')) { tg = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+            aplicarTema(tg);
+        }
+        inicializarTema();
+
+        // ==========================================
+        //  PANTALLA COMPLETA
+        // ==========================================
+        function toggleFullscreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+            const iconEnter = document.getElementById('iconEnterFS');
+            const iconExit = document.getElementById('iconExitFS');
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl).catch(err => console.log(err));
+                iconEnter.style.display = 'none';
+                iconExit.style.display = 'block';
+            } else {
+                cancelFullScreen.call(doc);
+                iconEnter.style.display = 'block';
+                iconExit.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('fullscreenchange', exitHandler);
+        document.addEventListener('webkitfullscreenchange', exitHandler);
+        document.addEventListener('mozfullscreenchange', exitHandler);
+        document.addEventListener('MSFullscreenChange', exitHandler);
+
+        function exitHandler() {
+            if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+                document.getElementById('iconEnterFS').style.display = 'block';
+                document.getElementById('iconExitFS').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
